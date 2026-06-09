@@ -55,7 +55,7 @@ with col_b:
         model_path = os.path.join(BASE_DIR, "..", "runs", "detect", "runs", factory, "train", "weights", "best.pt")
         if os.path.exists(model_path):
             model = YOLO(model_path)
-            results = model(img, verbose=False)
+            results = model(img, verbose=False, conf=0.01)
             res_img = results[0].plot()
             st.image(res_img, caption=f"Detection result - {factory}", use_container_width=True)
             detections = results[0].boxes
