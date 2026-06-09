@@ -1,0 +1,37 @@
+[
+  {
+    "round": 1,
+    "num_clients": 3,
+    "epsilon_used": 0.5,
+    "failures": 0,
+    "avg_mAP": 0.0493
+  },
+  {
+    "round": 2,
+    "num_clients": 3,
+    "epsilon_used": 1.0,
+    "failures": 0,
+    "avg_mAP": 0.0629
+  },
+  {
+    "round": 3,
+    "num_clients": 3,
+    "epsilon_used": 1.5,
+    "failures": 0,
+    "avg_mAP": 0.0232
+  },
+  {
+    "round": 4,
+    "num_clients": 3,
+    "epsilon_used": 2.0,
+    "failures": 0,
+    "avg_mAP": 0.0174
+  },
+  {
+    "round": 5,
+    "num_clients": 3,
+    "epsilon_used": 2.5,
+    "failures": 0,
+    "avg_mAP": 0.0148
+  }
+]

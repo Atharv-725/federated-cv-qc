@@ -1,0 +1,5 @@
+path: C:/Users/dorle/federated-cv-qc/data/factory_c/yolo
+train: train/images
+val: val/images
+nc: 2
+names: ['good', 'defect']
