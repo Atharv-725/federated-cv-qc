@@ -4,34 +4,69 @@
     "num_clients": 3,
     "epsilon_used": 0.5,
     "failures": 0,
-    "avg_mAP": 0.0493
+    "avg_accuracy": 0.0
   },
   {
     "round": 2,
     "num_clients": 3,
     "epsilon_used": 1.0,
     "failures": 0,
-    "avg_mAP": 0.0629
+    "avg_accuracy": 0.0
   },
   {
     "round": 3,
     "num_clients": 3,
     "epsilon_used": 1.5,
     "failures": 0,
-    "avg_mAP": 0.0232
+    "avg_accuracy": 0.0
   },
   {
     "round": 4,
     "num_clients": 3,
     "epsilon_used": 2.0,
     "failures": 0,
-    "avg_mAP": 0.0174
+    "avg_accuracy": 0.0
   },
   {
     "round": 5,
     "num_clients": 3,
     "epsilon_used": 2.5,
     "failures": 0,
-    "avg_mAP": 0.0148
+    "avg_accuracy": 0.0
+  },
+  {
+    "round": 6,
+    "num_clients": 3,
+    "epsilon_used": 3.0,
+    "failures": 0,
+    "avg_accuracy": 0.0
+  },
+  {
+    "round": 7,
+    "num_clients": 3,
+    "epsilon_used": 3.5,
+    "failures": 0,
+    "avg_accuracy": 0.0
+  },
+  {
+    "round": 8,
+    "num_clients": 3,
+    "epsilon_used": 4.0,
+    "failures": 0,
+    "avg_accuracy": 0.0
+  },
+  {
+    "round": 9,
+    "num_clients": 3,
+    "epsilon_used": 4.5,
+    "failures": 0,
+    "avg_accuracy": 0.0
+  },
+  {
+    "round": 10,
+    "num_clients": 3,
+    "epsilon_used": 5.0,
+    "failures": 0,
+    "avg_accuracy": 0.0
   }
 ]

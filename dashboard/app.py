@@ -19,25 +19,17 @@ if os.path.exists(log_path):
     with open(log_path) as f:
         logs = json.load(f)
     df = pd.DataFrame(logs)
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
     col1.metric("Rounds Completed", int(df["round"].max()))
     col2.metric("Total Epsilon Spent", f"{df['epsilon_used'].max():.2f}")
     col3.metric("Clients per Round", int(df["num_clients"].iloc[-1]))
-    last_map = df["avg_mAP"].iloc[-1] if "avg_mAP" in df.columns else 0.0
-    col4.metric("Final mAP", f"{last_map:.4f}")
     st.subheader("Training Progress")
-    fig, axes = plt.subplots(1, 2, figsize=(12, 3))
-    axes[0].plot(df["round"], df["epsilon_used"], color="#534AB7", marker="o", linewidth=2)
-    axes[0].set_title("DP Epsilon Budget Consumed per Round")
-    axes[0].set_xlabel("Round")
-    axes[0].set_ylabel("Cumulative Epsilon")
-    axes[0].grid(True, alpha=0.3)
-    if "avg_mAP" in df.columns:
-        axes[1].plot(df["round"], df["avg_mAP"], color="#1D9E75", marker="o", linewidth=2)
-        axes[1].set_title("Global mAP per Round")
-        axes[1].set_xlabel("Round")
-        axes[1].set_ylabel("mAP")
-        axes[1].grid(True, alpha=0.3)
+    fig, ax = plt.subplots(figsize=(8, 3))
+    ax.plot(df["round"], df["epsilon_used"], color="#534AB7", marker="o", linewidth=2)
+    ax.set_title("DP Epsilon Budget Consumed per Round")
+    ax.set_xlabel("Round")
+    ax.set_ylabel("Cumulative Epsilon")
+    ax.grid(True, alpha=0.3)
     plt.tight_layout()
     st.pyplot(fig)
 else:
@@ -52,22 +44,26 @@ with col_a:
 with col_b:
     if uploaded:
         img = Image.open(uploaded).convert("RGB")
-        model_path = os.path.join(BASE_DIR, "..", "runs", "detect", "runs", factory, "train", "weights", "best.pt")
+        st.image(img, caption="Input image", width=300)
+        model_path = os.path.join(BASE_DIR, "..", "runs", "classify", "runs", "cls", factory, "train", "weights", "best.pt")
         if os.path.exists(model_path):
             model = YOLO(model_path)
-            results = model(img, verbose=False, conf=0.01)
-            res_img = results[0].plot()
-            st.image(res_img, caption=f"Detection result - {factory}", use_container_width=True)
-            detections = results[0].boxes
-            if detections is not None and len(detections) > 0:
-                for box in detections:
-                    cls_id = int(box.cls)
-                    cls_name = results[0].names[cls_id]
-                    conf = float(box.conf)
-                    icon = "🔴" if cls_name == "defect" else "🟢"
-                    st.write(f"{icon} **{cls_name.upper()}** - confidence: {conf:.2%}")
+            results = model(img, verbose=False)
+            probs = results[0].probs
+            top1_idx = probs.top1
+            top1_label = model.names[top1_idx]
+            top1_conf = float(probs.top1conf)
+            all_probs = probs.data.tolist()
+            if top1_label == "defect":
+                st.error(f"DEFECT DETECTED — confidence: {top1_conf:.2%}")
             else:
-                st.info("No detections found.")
+                st.success(f"GOOD PRODUCT — confidence: {top1_conf:.2%}")
+            st.subheader("Class Probabilities")
+            prob_df = pd.DataFrame({
+                "Class": [model.names[i] for i in range(len(all_probs))],
+                "Confidence": [round(p, 4) for p in all_probs]
+            })
+            st.bar_chart(prob_df.set_index("Class"))
         else:
             st.error(f"Model not found: {model_path}")
     else:
