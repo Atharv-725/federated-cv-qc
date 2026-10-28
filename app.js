@@ -123,6 +123,10 @@
     verdictTitle: document.getElementById('verdict-title'),
     verdictDescription: document.getElementById('verdict-description'),
     phInferenceTime: document.getElementById('ph-inference-time'),
+    top1PredictionCard: document.getElementById('top1-prediction-card'),
+    hudTop1Class: document.getElementById('hud-top1-class'),
+    hudTop1Conf: document.getElementById('hud-top1-conf'),
+    hudTop1Certainty: document.getElementById('hud-top1-certainty'),
     hudDefectProb: document.getElementById('hud-defect-prob'),
     hudDefectBar: document.getElementById('hud-defect-bar'),
     hudGoodProb: document.getElementById('hud-good-prob'),
@@ -810,8 +814,29 @@
 
     const threshold = state.sensitivityThreshold;
     const isDefect = res.defectProb >= threshold;
+    const top1Conf = isDefect ? res.defectProb : res.goodProb;
 
-    // Probability meters
+    // Primary Top-1 Classification Confidence Card
+    if (els.top1PredictionCard) {
+      els.top1PredictionCard.className = isDefect ? 'top1-prediction-card defect' : 'top1-prediction-card good';
+    }
+    if (els.hudTop1Class) {
+      els.hudTop1Class.textContent = isDefect ? 'DEFECT DETECTED' : 'NOMINAL / GOOD PRODUCT';
+      els.hudTop1Class.className = isDefect ? 'top1-class-name text-rose' : 'top1-class-name text-emerald';
+    }
+    if (els.hudTop1Conf) {
+      els.hudTop1Conf.textContent = `${top1Conf.toFixed(1)}%`;
+      els.hudTop1Conf.className = isDefect ? 'top1-score text-rose' : 'top1-score text-emerald';
+    }
+    if (els.hudTop1Certainty) {
+      if (isDefect) {
+        els.hudTop1Certainty.textContent = top1Conf >= 90 ? 'High Defect Certainty' : 'Threshold Breach Detected';
+      } else {
+        els.hudTop1Certainty.textContent = top1Conf >= 95 ? 'High Nominal Certainty' : 'Within Tolerance Limit';
+      }
+    }
+
+    // Probability breakdown meters
     els.hudDefectProb.textContent = `${res.defectProb.toFixed(1)}%`;
     els.hudDefectBar.style.width = `${res.defectProb}%`;
     els.hudGoodProb.textContent = `${res.goodProb.toFixed(1)}%`;

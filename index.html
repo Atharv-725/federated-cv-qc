@@ -232,32 +232,49 @@
             </div>
           </div>
 
-          <!-- Real-Time Confidence Gauges -->
+          <!-- Real-Time Classification Confidence Gauges -->
           <div class="metrics-panel glass-card">
             <div class="panel-heading-row">
               <span class="ph-title">Classification Confidence</span>
-              <span class="ph-badge" id="ph-inference-time">13.8 ms</span>
+              <span class="ph-badge" id="ph-inference-time">11.8 ms</span>
             </div>
 
-            <!-- Defect Probability Bar -->
-            <div class="prob-row">
-              <div class="prob-label-wrap">
-                <span class="prob-name text-rose">Defect Probability</span>
-                <span class="prob-number text-rose" id="hud-defect-prob">97.4%</span>
+            <!-- Primary Top-1 Prediction Card -->
+            <div class="top1-prediction-card defect" id="top1-prediction-card">
+              <div class="top1-meta-left">
+                <span class="top1-subtitle">Top-1 Predicted Class</span>
+                <span class="top1-class-name text-rose" id="hud-top1-class">DEFECT DETECTED</span>
               </div>
-              <div class="prob-track">
-                <div class="prob-bar bar-rose" id="hud-defect-bar" style="width: 97.4%;"></div>
+              <div class="top1-meta-right">
+                <span class="top1-score text-rose" id="hud-top1-conf">97.4%</span>
+                <span class="top1-certainty" id="hud-top1-certainty">High Certainty Defect</span>
               </div>
             </div>
 
-            <!-- Good Probability Bar -->
-            <div class="prob-row">
-              <div class="prob-label-wrap">
-                <span class="prob-name text-emerald">Nominal / Good Probability</span>
-                <span class="prob-number text-emerald" id="hud-good-prob">2.6%</span>
+            <!-- Class Probability Distribution -->
+            <div class="prob-distribution-wrap">
+              <span class="prob-dist-label">Class Probability Distribution:</span>
+
+              <!-- Nominal / Good Probability Bar -->
+              <div class="prob-row">
+                <div class="prob-label-wrap">
+                  <span class="prob-name text-emerald">Nominal / Good Product</span>
+                  <span class="prob-number text-emerald" id="hud-good-prob">2.6%</span>
+                </div>
+                <div class="prob-track">
+                  <div class="prob-bar bar-emerald" id="hud-good-bar" style="width: 2.6%;"></div>
+                </div>
               </div>
-              <div class="prob-track">
-                <div class="prob-bar bar-emerald" id="hud-good-bar" style="width: 2.6%;"></div>
+
+              <!-- Defect Probability Bar -->
+              <div class="prob-row">
+                <div class="prob-label-wrap">
+                  <span class="prob-name text-rose">Defect / Non-Conforming</span>
+                  <span class="prob-number text-rose" id="hud-defect-prob">97.4%</span>
+                </div>
+                <div class="prob-track">
+                  <div class="prob-bar bar-rose" id="hud-defect-bar" style="width: 97.4%;"></div>
+                </div>
               </div>
             </div>
           </div>
