@@ -1,10 +1,12 @@
-﻿# Exclude raw dataset (too large)
+# Exclude raw dataset (too large)
 data/factory_a/metal_nut/
 data/factory_b/transistor/
 data/factory_c/carpet/
 data/factory_a/yolo/
 data/factory_b/yolo/
 data/factory_c/yolo/
+data/*/*balanced/
+__pycache__/
 
 # Keep everything else
 !runs/
