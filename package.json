@@ -1,0 +1,22 @@
+{
+  "name": "federated-cv-qc",
+  "version": "1.0.0",
+  "description": "Privacy-Preserving Industrial Defect Detection using Federated Learning, YOLOv8, and Differential Privacy",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx -y serve .",
+    "start": "npx -y serve .",
+    "build": "echo 'Static web dashboard ready for Vercel deployment.'"
+  },
+  "keywords": [
+    "federated-learning",
+    "yolov8",
+    "differential-privacy",
+    "flower",
+    "computer-vision",
+    "quality-control",
+    "industrial-ai"
+  ],
+  "author": "Atharv Dorle (THUNDER)",
+  "license": "MIT"
+}

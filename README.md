@@ -3,6 +3,7 @@
 > Privacy-preserving industrial defect detection using Federated Learning, YOLOv8, and Differential Privacy — raw images never leave the factory.
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://federated-cv-qc.streamlit.app)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Atharv-725/federated-cv-qc)
 ![Python](https://img.shields.io/badge/Python-3.14-blue)
 ![YOLOv8](https://img.shields.io/badge/YOLOv8-Ultralytics-orange)
 ![Flower](https://img.shields.io/badge/Federated-Flower_FL-purple)
@@ -233,10 +234,19 @@ python clients/client_cls.py factory_c data/factory_c/cls
 
 Training runs for **10 rounds** (~25 minutes on CPU). After completion:
 
+### Option A — Interactive Web Dashboard (Vercel-ready):
+```bash
+# Preview locally
+npx serve .
+# Or deploy directly to Vercel
+npx vercel
+```
+Or open `index.html` directly in any modern browser.
+
+### Option B — Streamlit Python Dashboard:
 ```bash
 streamlit run dashboard/app.py
 ```
-
 Open `http://localhost:8501` in your browser.
 
 ---
