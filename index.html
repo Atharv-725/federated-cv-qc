@@ -3,13 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Federated CV Quality Control — Privacy-Preserving Defect Detection</title>
-  <meta name="description" content="Industrial defect detection platform combining YOLOv8, Flower Federated Learning, and Differential Privacy to train computer vision models across distributed factories without sharing raw image data.">
-  <meta name="keywords" content="Federated Learning, YOLOv8, Differential Privacy, Computer Vision, Industrial Quality Control, Flower FL, MVTec AD">
+  <title>Federated CV Quality Control — Interactive Defect Detection</title>
+  <meta name="description" content="Industrial quality control platform for defect detection. Upload any product image to run live computer vision anomaly inspection, CAM heatmaps, and differential privacy federated learning analysis.">
+  <meta name="keywords" content="Federated Learning, YOLOv8, Defect Detection, Quality Control, Computer Vision, CAM Heatmap, MVTec AD">
   <meta name="author" content="Atharv Dorle (THUNDER)">
-  <meta property="og:title" content="Federated CV Quality Control">
-  <meta property="og:description" content="Privacy-preserving industrial defect detection across 3 factories with zero raw image exposure.">
-  <meta property="og:type" content="website">
 
   <!-- Modern Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,25 +35,24 @@
         </div>
         <div class="brand-text">
           <span class="brand-title">FEDERATED CV QC</span>
-          <span class="brand-badge">FL + DP ENGINE</span>
+          <span class="brand-badge">INTERACTIVE INSPECTION STUDIO</span>
         </div>
       </div>
 
       <nav class="nav-links" id="main-navigation" aria-label="Main Navigation">
-        <a href="#inspection-section" class="nav-link active" id="nav-inspection">Live Inspection</a>
+        <a href="#studio-section" class="nav-link active" id="nav-studio">Live QC Studio</a>
         <a href="#topology-section" class="nav-link" id="nav-topology">Edge Mesh</a>
         <a href="#metrics-section" class="nav-link" id="nav-metrics">DP Budget</a>
-        <a href="#architecture-section" class="nav-link" id="nav-arch">Architecture</a>
-        <a href="#research-section" class="nav-link" id="nav-research">Research</a>
+        <a href="#architecture-section" class="nav-link" id="nav-arch">Privacy Architecture</a>
       </nav>
 
       <div class="header-actions">
-        <div class="status-indicator-pill" id="system-status-indicator" title="Flower FedAvg Aggregation Server Status">
+        <div class="status-indicator-pill" id="system-status-indicator">
           <span class="status-dot pulse-animation"></span>
-          <span class="status-label">3 Nodes Synced</span>
+          <span class="status-label">Engine Ready</span>
         </div>
-        <a href="https://github.com/Atharv-725/federated-cv-qc" target="_blank" rel="noopener noreferrer" class="btn-github-link" id="btn-github-repo" title="View Source on GitHub">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+        <a href="https://github.com/Atharv-725/federated-cv-qc" target="_blank" rel="noopener noreferrer" class="btn-github-link" id="btn-github-repo" title="View GitHub Repository">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
           </svg>
           <span>GitHub</span>
@@ -66,423 +62,277 @@
   </header>
 
   <main class="main-content" id="main-content">
-    <!-- Hero Section -->
-    <section class="hero-section" id="hero-section">
-      <div class="hero-content">
-        <div class="hero-tag">
-          <span class="tag-icon">⚡</span>
-          <span>FLOWER FL + YOLOV8 + GAUSSIAN DIFFERENTIAL PRIVACY</span>
+    <!-- Studio Header & Action Bar -->
+    <section class="section studio-section" id="studio-section">
+      <div class="studio-header-wrap">
+        <div class="studio-intro">
+          <div class="live-pill">
+            <span class="live-pulse"></span>
+            <span>LIVE INTERACTIVE DEFECT INSPECTION ENGINE</span>
+          </div>
+          <h1 class="studio-title">Industrial <span class="gradient-text">Defect Detection Studio</span></h1>
+          <p class="studio-subtitle">
+            Upload <strong>any product image</strong> from your computer (or choose a benchmark workpiece) to perform real-time optical anomaly detection, edge crack segmentation, and class activation mapping.
+          </p>
         </div>
-        <h1 class="hero-title">
-          Privacy-Preserving Industrial <span class="gradient-text">Defect Detection</span>
-        </h1>
-        <p class="hero-subtitle">
-          Collaborative computer vision quality control across 3 distributed manufacturing hubs. Raw inspection images remain 100% on-premises — only noise-injected model weight updates ($\Delta W$) are aggregated via Flower FedAvg.
-        </p>
 
         <!-- KPI Telemetry Bar -->
-        <div class="kpi-grid" id="kpi-grid">
-          <div class="kpi-card" id="kpi-rounds">
-            <div class="kpi-header">
-              <span class="kpi-title">ROUNDS COMPLETED</span>
-              <span class="kpi-badge badge-success">Done</span>
-            </div>
-            <div class="kpi-value-row">
-              <span class="kpi-value" id="kpi-val-rounds">10</span>
-              <span class="kpi-unit">/ 10</span>
-            </div>
-            <p class="kpi-caption">Flower FedAvg global convergence</p>
+        <div class="kpi-mini-grid">
+          <div class="kpi-mini-card">
+            <span class="kpi-mini-label">GLOBAL MODEL</span>
+            <span class="kpi-mini-val">YOLOv8n-cls (R10)</span>
+            <span class="kpi-mini-sub">Flower FedAvg</span>
           </div>
-
-          <div class="kpi-card" id="kpi-epsilon">
-            <div class="kpi-header">
-              <span class="kpi-title">DP PRIVACY SPENT</span>
-              <span class="kpi-badge badge-purple">&epsilon; Bound</span>
-            </div>
-            <div class="kpi-value-row">
-              <span class="kpi-value" id="kpi-val-epsilon">5.00</span>
-              <span class="kpi-unit">&epsilon; (Gaussian)</span>
-            </div>
-            <p class="kpi-caption">&delta; = 1e-5 mathematical budget</p>
+          <div class="kpi-mini-card">
+            <span class="kpi-mini-label">PRIVACY BOUND</span>
+            <span class="kpi-mini-val">&epsilon; = 5.0 / &delta; = 1e-5</span>
+            <span class="kpi-mini-sub">Gaussian Noise Injected</span>
           </div>
-
-          <div class="kpi-card" id="kpi-factories">
-            <div class="kpi-header">
-              <span class="kpi-title">EDGE CLIENTS</span>
-              <span class="kpi-badge badge-cyan">Active</span>
-            </div>
-            <div class="kpi-value-row">
-              <span class="kpi-value" id="kpi-val-factories">3</span>
-              <span class="kpi-unit">Nodes</span>
-            </div>
-            <p class="kpi-caption">Metal Nuts, Transistors, Carpet</p>
-          </div>
-
-          <div class="kpi-card" id="kpi-leakage">
-            <div class="kpi-header">
-              <span class="kpi-title">RAW DATA EXPOSED</span>
-              <span class="kpi-badge badge-emerald">Zero Leak</span>
-            </div>
-            <div class="kpi-value-row">
-              <span class="kpi-value" id="kpi-val-leakage">0</span>
-              <span class="kpi-unit">Bytes</span>
-            </div>
-            <p class="kpi-caption">Images never leave local storage</p>
+          <div class="kpi-mini-card">
+            <span class="kpi-mini-label">DATA LEAKAGE</span>
+            <span class="kpi-mini-val text-emerald">0 Bytes Transmitted</span>
+            <span class="kpi-mini-sub">100% Client-Side Privacy</span>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- Core Feature 1: Live Defect Detection Inspection Lab -->
-    <section class="section inspection-section" id="inspection-section">
-      <div class="section-header">
-        <div class="section-title-wrap">
-          <span class="section-eyebrow">INFERENCE CONSOLE</span>
-          <h2 class="section-title">Live Industrial Quality Control Lab</h2>
-        </div>
-        <p class="section-desc">
-          Test trained YOLOv8 classification models across Factory lines. Inspect pre-loaded real MVTec dataset anomalies or upload a custom workpiece image.
-        </p>
-      </div>
-
-      <!-- Factory Line Selector Tabs -->
-      <div class="factory-tabs-container" role="tablist" aria-label="Factory Lines">
-        <button class="factory-tab active" id="tab-factory-a" role="tab" aria-selected="true" data-factory="factory_a">
-          <div class="tab-badge">FACTORY A</div>
-          <div class="tab-info">
-            <span class="tab-name">Metal Nuts</span>
-            <span class="tab-detail">Fasteners & Automotive • 2.9 MB</span>
-          </div>
-        </button>
-
-        <button class="factory-tab" id="tab-factory-b" role="tab" aria-selected="false" data-factory="factory_b">
-          <div class="tab-badge">FACTORY B</div>
-          <div class="tab-info">
-            <span class="tab-name">Transistors</span>
-            <span class="tab-detail">Semiconductor Leads • 2.9 MB</span>
-          </div>
-        </button>
-
-        <button class="factory-tab" id="tab-factory-c" role="tab" aria-selected="false" data-factory="factory_c">
-          <div class="tab-badge">FACTORY C</div>
-          <div class="tab-info">
-            <span class="tab-name">Carpet & Textiles</span>
-            <span class="tab-detail">Industrial Weave • 2.9 MB</span>
-          </div>
-        </button>
-      </div>
-
-      <!-- Inspection Workspace Grid -->
-      <div class="inspection-grid">
-        <!-- Left: Workpiece Viewport & Sample Palette -->
-        <div class="inspection-viewport-panel glass-card">
-          <div class="panel-header">
-            <div class="panel-title-group">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="22" y1="12" x2="18" y2="12" />
-                <line x1="6" y1="12" x2="2" y2="12" />
-                <line x1="12" y1="6" x2="12" y2="2" />
-                <line x1="12" y1="22" x2="12" y2="18" />
-              </svg>
-              <span class="panel-title">Optical Inspection Viewport</span>
-            </div>
-            <div class="viewport-controls">
-              <button class="control-toggle-btn active" id="btn-toggle-cam" title="Toggle Anomaly Class Activation Mapping Heatmap">
-                <span class="toggle-dot"></span>
-                <span>CAM Heatmap</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Main Image Canvas Container -->
-          <div class="viewport-canvas-wrapper" id="canvas-container">
-            <div class="viewport-canvas" id="viewport-canvas">
-              <img id="inspection-image" src="samples/factory_a_bent.jpg" alt="Workpiece Inspection Image" crossorigin="anonymous">
-              <canvas id="heatmap-overlay-canvas" class="heatmap-overlay" width="400" height="400"></canvas>
-              
-              <!-- Laser Scanner Sweep Line -->
-              <div class="laser-scanner-line" id="laser-scanner" aria-hidden="true"></div>
-
-              <!-- Reticle Target HUD -->
-              <div class="reticle-hud" id="reticle-hud" aria-hidden="true">
-                <div class="reticle-corner corner-tl"></div>
-                <div class="reticle-corner corner-tr"></div>
-                <div class="reticle-corner corner-bl"></div>
-                <div class="reticle-corner corner-br"></div>
-                <div class="reticle-crosshair"></div>
-              </div>
-            </div>
-
-            <!-- Image Loading / Scanning Overlay -->
-            <div class="scan-state-overlay" id="scan-state-overlay" style="display: none;">
-              <div class="scan-spinner"></div>
-              <span class="scan-text">Executing Edge Inference...</span>
-            </div>
-          </div>
-
-          <!-- Sample Palette & Upload Zone -->
-          <div class="sample-palette-section">
-            <div class="palette-header">
-              <span class="palette-title">Curated Workpiece Samples</span>
-              <span class="palette-sub" id="sample-count-label">4 items available</span>
-            </div>
-
-            <!-- Dynamic Sample Thumbnails -->
-            <div class="sample-thumbnail-tray" id="sample-thumbnail-tray">
-              <!-- Rendered via JS -->
-            </div>
-
-            <!-- Custom Image Uploader Dropzone -->
-            <div class="custom-upload-dropzone" id="upload-dropzone">
-              <input type="file" id="file-input" accept="image/png,image/jpeg,image/jpg" class="visually-hidden">
-              <label for="file-input" class="dropzone-label">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+      <!-- MAIN INTERACTIVE WORKSPACE (2 Columns) -->
+      <div class="studio-grid">
+        <!-- LEFT COLUMN: Image Ingestion, Viewport, and Probe -->
+        <div class="studio-left-col">
+          <!-- Primary Upload & Ingestion Center -->
+          <div class="upload-center-card glass-card" id="upload-center-card">
+            <input type="file" id="primary-file-input" accept="image/*" class="visually-hidden">
+            
+            <div class="upload-dropzone-hero" id="primary-dropzone">
+              <div class="upload-icon-circle">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="17 8 12 3 7 8" />
                   <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
-                <div class="dropzone-text">
-                  <span class="dropzone-main">Drop inspection image here or <span class="highlight">browse</span></span>
-                  <span class="dropzone-hint">Supports PNG, JPG, JPEG up to 10MB</span>
+              </div>
+              <div class="upload-prompt-text">
+                <h3 class="upload-heading">Drop any product image here or <button type="button" class="btn-browse-trigger" id="btn-browse-trigger">Browse Files</button></h3>
+                <p class="upload-sub">Supports PNG, JPG, JPEG, WEBP • Or press <kbd>Ctrl</kbd> + <kbd>V</kbd> to paste from clipboard</p>
+              </div>
+            </div>
+
+            <!-- Preset Benchmark Quick-Switchers -->
+            <div class="benchmark-pills-bar">
+              <span class="pills-title">Or test benchmark workpiece:</span>
+              <div class="pills-group" id="benchmark-pills-group">
+                <button type="button" class="pill-btn active" data-sample="bent_nut">🔩 Bent Nut (Defect)</button>
+                <button type="button" class="pill-btn" data-sample="scratch_nut">⚙️ Scratch Nut (Defect)</button>
+                <button type="button" class="pill-btn" data-sample="broken_lead">⚡ Bent Lead (Defect)</button>
+                <button type="button" class="pill-btn" data-sample="carpet_hole">🧵 Puncture Hole (Defect)</button>
+                <button type="button" class="pill-btn good-pill" data-sample="good_nut">✅ Pristine Nut (Pass)</button>
+                <button type="button" class="pill-btn good-pill" data-sample="good_chip">✅ Pristine IC (Pass)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Workpiece Optical Viewport -->
+          <div class="viewport-card glass-card">
+            <div class="viewport-toolbar">
+              <div class="toolbar-left">
+                <span class="toolbar-title">Workpiece Visualizer</span>
+                <span class="image-name-badge" id="current-image-name">factory_a_bent.jpg</span>
+              </div>
+
+              <!-- View Mode Tabs -->
+              <div class="view-mode-tabs" role="tablist">
+                <button type="button" class="view-tab active" data-mode="raw" id="tab-mode-raw" title="Standard high-resolution optical image">Normal</button>
+                <button type="button" class="view-tab" data-mode="cam" id="tab-mode-cam" title="Class Activation Mapping Anomaly Heatmap">CAM Heatmap</button>
+                <button type="button" class="view-tab" data-mode="edge" id="tab-mode-edge" title="Sobel gradient edge filter highlighting cracks and discontinuities">Edge Metrology</button>
+                <button type="button" class="view-tab" data-mode="mask" id="tab-mode-mask" title="Binary segmentation mask of anomalous pixels">Threshold Mask</button>
+              </div>
+            </div>
+
+            <!-- Canvas Viewport Frame -->
+            <div class="optical-stage-wrap" id="optical-stage-wrap">
+              <div class="stage-canvas-box" id="stage-canvas-box">
+                <!-- Base Image -->
+                <img id="workpiece-image" src="samples/factory_a_bent.jpg" alt="Inspection workpiece image" crossorigin="anonymous">
+                
+                <!-- Dynamic Processing Canvas (Edge / Heatmap / Mask) -->
+                <canvas id="processing-canvas" class="processing-canvas" width="400" height="400"></canvas>
+
+                <!-- High-Tech Animated Laser Scanner Line -->
+                <div class="laser-scanner" id="laser-scanner" aria-hidden="true"></div>
+
+                <!-- Bounding Target Reticle -->
+                <div class="target-reticle" id="target-reticle">
+                  <div class="reticle-corner c-tl"></div>
+                  <div class="reticle-corner c-tr"></div>
+                  <div class="reticle-corner c-bl"></div>
+                  <div class="reticle-corner c-br"></div>
+                  <div class="reticle-tag" id="reticle-tag">ANOMALY ZONE</div>
                 </div>
-              </label>
+
+                <!-- Interactive Pixel Probe Loupe -->
+                <div class="pixel-probe-hud" id="pixel-probe-hud" style="display: none;">
+                  <span class="probe-coords" id="probe-coords">X: 180 Y: 220</span>
+                  <span class="probe-intensity" id="probe-intensity">Anomaly: 84%</span>
+                </div>
+              </div>
+
+              <!-- Scanning Progress Spinner -->
+              <div class="scan-overlay-curtain" id="scan-overlay-curtain" style="display: none;">
+                <div class="scanner-spinner"></div>
+                <span class="scanner-status" id="scanner-status-text">Scanning Workpiece Geometry...</span>
+              </div>
+            </div>
+
+            <!-- Viewport Bottom Controls -->
+            <div class="viewport-footer">
+              <div class="vf-item">
+                <span class="vf-label">Resolution:</span>
+                <span class="vf-val" id="vf-resolution">400 &times; 400 px</span>
+              </div>
+              <div class="vf-item">
+                <span class="vf-label">Inspected Surface:</span>
+                <span class="vf-val" id="vf-surface">160,000 px²</span>
+              </div>
+              <div class="vf-item">
+                <span class="vf-label">Inspection Probe:</span>
+                <span class="vf-val text-cyan">Move mouse over image</span>
+              </div>
+              <div class="vf-actions">
+                <button type="button" class="btn-tool-secondary" id="btn-export-report" title="Export inspection result as PNG report">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  <span>Export Report</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Right: Metrology Readout & Decision HUD -->
-        <div class="inspection-hud-panel glass-card">
-          <div class="panel-header">
-            <div class="panel-title-group">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
-              <span class="panel-title">Model Telemetry & Verdict</span>
-            </div>
-            <span class="model-tag" id="hud-model-tag">YOLOv8n-cls (R10)</span>
-          </div>
-
-          <!-- Major Verdict Banner -->
-          <div class="verdict-banner defect" id="verdict-banner">
-            <div class="verdict-icon-wrap" id="verdict-icon-wrap">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" id="verdict-icon">
+        <!-- RIGHT COLUMN: Real-Time Metrology, Defect Decision HUD & Sensitivity -->
+        <div class="studio-right-col">
+          <!-- Main Verdict Banner -->
+          <div class="verdict-card glass-card defect" id="verdict-card">
+            <div class="verdict-icon-container" id="verdict-icon-container">
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5" id="verdict-svg">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
             </div>
-            <div class="verdict-text-wrap">
-              <div class="verdict-badge" id="verdict-badge">QC ALERT</div>
-              <div class="verdict-heading" id="verdict-heading">DEFECT DETECTED</div>
-              <div class="verdict-sub" id="verdict-sub">Workpiece fails dimensional & surface integrity standards</div>
+            <div class="verdict-content">
+              <div class="verdict-status-tag" id="verdict-status-tag">QC DEFECT DETECTED</div>
+              <h2 class="verdict-title" id="verdict-title">NON-CONFORMING PART</h2>
+              <p class="verdict-description" id="verdict-description">
+                Surface anomaly breaches tolerance limits. Part flagged for secondary metrology review or divert to reject bin.
+              </p>
             </div>
           </div>
 
-          <!-- Confidence Breakdown Gauges -->
-          <div class="telemetry-box">
-            <div class="box-header">
-              <span class="box-title">Class Probabilities</span>
-              <span class="box-meta">Softmax Output</span>
+          <!-- Real-Time Confidence Gauges -->
+          <div class="metrics-panel glass-card">
+            <div class="panel-heading-row">
+              <span class="ph-title">Classification Confidence</span>
+              <span class="ph-badge" id="ph-inference-time">13.8 ms</span>
             </div>
 
-            <!-- Defect Bar -->
+            <!-- Defect Probability Bar -->
             <div class="prob-row">
-              <div class="prob-labels">
-                <span class="prob-name name-defect">Defective Product</span>
-                <span class="prob-val" id="prob-defect-val">97.42%</span>
+              <div class="prob-label-wrap">
+                <span class="prob-name text-rose">Defect Probability</span>
+                <span class="prob-number text-rose" id="hud-defect-prob">97.4%</span>
               </div>
               <div class="prob-track">
-                <div class="prob-fill fill-defect" id="prob-defect-bar" style="width: 97.42%;"></div>
+                <div class="prob-bar bar-rose" id="hud-defect-bar" style="width: 97.4%;"></div>
               </div>
             </div>
 
-            <!-- Good Bar -->
+            <!-- Good Probability Bar -->
             <div class="prob-row">
-              <div class="prob-labels">
-                <span class="prob-name name-good">Nominal / Good Product</span>
-                <span class="prob-val" id="prob-good-val">2.58%</span>
+              <div class="prob-label-wrap">
+                <span class="prob-name text-emerald">Nominal / Good Probability</span>
+                <span class="prob-number text-emerald" id="hud-good-prob">2.6%</span>
               </div>
               <div class="prob-track">
-                <div class="prob-fill fill-good" id="prob-good-bar" style="width: 2.58%;"></div>
+                <div class="prob-bar bar-emerald" id="hud-good-bar" style="width: 2.6%;"></div>
               </div>
             </div>
           </div>
 
-          <!-- Metrology Details Grid -->
-          <div class="metrology-details-grid">
-            <div class="metrology-item">
-              <span class="metro-label">INFERENCE LATENCY</span>
-              <span class="metro-val" id="metro-latency">13.8 ms</span>
-              <span class="metro-note">Edge CPU Tensor</span>
+          <!-- Detailed Metrology Telemetry Grid -->
+          <div class="telemetry-grid glass-card">
+            <div class="telemetry-item">
+              <span class="ti-label">DETECTED DEFECT TYPE</span>
+              <span class="ti-value text-cyan" id="ti-defect-type">Surface Flange Warp</span>
+              <span class="ti-sub" id="ti-defect-sub">Morphological Irregularity</span>
             </div>
-            <div class="metrology-item">
-              <span class="metro-label">DETECTED ANOMALY</span>
-              <span class="metro-val highlight-val" id="metro-anomaly-type">Bent Contour</span>
-              <span class="metro-note">Morphological Defect</span>
+            <div class="telemetry-item">
+              <span class="ti-label">ESTIMATED DEFECT AREA</span>
+              <span class="ti-value" id="ti-defect-area">142 px²</span>
+              <span class="ti-sub" id="ti-defect-coverage">0.89% of Workpiece</span>
             </div>
-            <div class="metrology-item">
-              <span class="metro-label">DP NOISE ADDED</span>
-              <span class="metro-val" id="metro-dp-noise">&sigma; = 0.8</span>
-              <span class="metro-note">Gradient Obfuscation</span>
+            <div class="telemetry-item">
+              <span class="ti-label">ANOMALY CENTER (X, Y)</span>
+              <span class="ti-value font-mono" id="ti-defect-coords">X: 140, Y: 260</span>
+              <span class="ti-sub">Pixel Center of Mass</span>
             </div>
-            <div class="metrology-item">
-              <span class="metro-label">ACTUATOR DECISION</span>
-              <span class="metro-val action-val" id="metro-actuator">REJECT LINE 2</span>
-              <span class="metro-note">Pneumatic Sorter</span>
+            <div class="telemetry-item">
+              <span class="ti-label">PNEUMATIC ACTUATOR</span>
+              <span class="ti-value text-rose" id="ti-actuator">DIVERT TO BIN 2</span>
+              <span class="ti-sub">High-Speed Sorter</span>
             </div>
           </div>
 
-          <!-- Decision Threshold Sensitivity Slider -->
-          <div class="sensitivity-slider-box">
-            <div class="slider-header">
-              <label for="threshold-slider" class="slider-label">Anomaly Sensitivity Threshold</label>
-              <span class="slider-val" id="threshold-val">50%</span>
+          <!-- Interactive Sensitivity Threshold Controller -->
+          <div class="controls-panel glass-card">
+            <div class="control-header">
+              <label for="threshold-range" class="control-label">Defect Tolerance Threshold</label>
+              <span class="control-badge" id="threshold-display">50%</span>
             </div>
-            <input type="range" id="threshold-slider" min="10" max="95" value="50" step="5" class="custom-range-slider">
-            <div class="slider-ticks">
-              <span>High Sensitivity (10%)</span>
+            <p class="control-hint">Adjust inspection strictness. Lower values catch micro-flaws; higher values ignore minor cosmetic blemishes.</p>
+            <input type="range" id="threshold-range" min="15" max="90" value="50" step="5" class="styled-slider">
+            <div class="slider-labels">
+              <span>High Sensitivity (15%)</span>
               <span>Balanced (50%)</span>
-              <span>Strict (95%)</span>
+              <span>Lenient (90%)</span>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Core Feature 2: Differential Privacy & Training Curves (Real Log Data) -->
-    <section class="section metrics-section" id="metrics-section">
-      <div class="section-header">
-        <div class="section-title-wrap">
-          <span class="section-eyebrow">MATHEMATICAL PRIVACY ACCOUNTANT</span>
-          <h2 class="section-title">Differential Privacy & Convergence Curves</h2>
-        </div>
-        <p class="section-desc">
-          Actual telemetry from the 10 federated training rounds recorded in <code>server/logs/training_log.json</code>. Each round strictly adds $\epsilon = 0.5$ noise budget to satisfy $(\epsilon, \delta)$-Differential Privacy bounds.
-        </p>
-      </div>
-
-      <div class="metrics-grid">
-        <!-- Interactive Canvas Chart -->
-        <div class="chart-panel glass-card">
-          <div class="chart-header">
-            <div class="chart-title-wrap">
-              <span class="chart-title">Cumulative Privacy Budget Consumption (&epsilon;)</span>
-              <span class="chart-sub">&epsilon; vs Federated Round (Flower FedAvg)</span>
-            </div>
-            <div class="chart-legend">
-              <div class="legend-item"><span class="legend-dot dot-actual"></span>Cumulative &epsilon;</div>
-              <div class="legend-item"><span class="legend-dot dot-limit"></span>Privacy Limit (5.0)</div>
-            </div>
-          </div>
-
-          <!-- Interactive Chart Canvas -->
-          <div class="canvas-chart-container" id="chart-container">
-            <canvas id="dp-chart-canvas" width="700" height="280"></canvas>
-            <div class="chart-tooltip" id="chart-tooltip" style="display: none;"></div>
-          </div>
-
-          <div class="chart-footer-metrics">
-            <div class="cf-metric">
-              <span class="cf-label">Per-Round Budget</span>
-              <span class="cf-value">&Delta;&epsilon; = 0.50</span>
-            </div>
-            <div class="cf-metric">
-              <span class="cf-label">Total Rounds</span>
-              <span class="cf-value">10 Rounds</span>
-            </div>
-            <div class="cf-metric">
-              <span class="cf-label">Delta Parameter</span>
-              <span class="cf-value">&delta; = 1.0 &times; 10<sup>-5</sup></span>
-            </div>
-            <div class="cf-metric">
-              <span class="cf-label">Client Participation</span>
-              <span class="cf-value">100% (3/3 Clients)</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Round Inspector & Scrubber -->
-        <div class="rounds-stepper-panel glass-card">
-          <div class="stepper-header">
-            <span class="stepper-title">Federated Round Inspector</span>
-            <span class="stepper-sub">Scrub through training epochs</span>
-          </div>
-
-          <div class="round-scrubber-control">
-            <div class="round-number-display">
-              <span class="rn-label">ACTIVE ROUND:</span>
-              <span class="rn-value" id="scrubber-round-num">Round 10</span>
-            </div>
-            <input type="range" id="round-slider" min="1" max="10" value="10" step="1" class="custom-range-slider">
-          </div>
-
-          <!-- Dynamic Round Log Details -->
-          <div class="round-log-details" id="round-log-details">
-            <div class="log-row">
-              <span class="log-label">Participating Clients:</span>
-              <span class="log-val" id="log-num-clients">3 (Factory A, B, C)</span>
-            </div>
-            <div class="log-row">
-              <span class="log-label">Cumulative Epsilon (&epsilon;):</span>
-              <span class="log-val highlight-purple" id="log-epsilon">5.00</span>
-            </div>
-            <div class="log-row">
-              <span class="log-label">Round Status / Failures:</span>
-              <span class="log-val text-success" id="log-failures">0 Failures (Nominal)</span>
-            </div>
-            <div class="log-row">
-              <span class="log-label">Model Weights Transmitted:</span>
-              <span class="log-val" id="log-weight-tx">3 &times; 2.9 MB = 8.7 MB (&Delta;W)</span>
-            </div>
-            <div class="log-row">
-              <span class="log-label">Privacy Guarantee:</span>
-              <span class="log-val text-emerald">Reconstruction Bound Met</span>
-            </div>
-          </div>
-
-          <div class="round-annotation-box" id="round-annotation-box">
-            <div class="annotation-badge">ROUND 10 MILESTONE</div>
-            <p class="annotation-text" id="round-annotation-text">
-              Final global aggregation completed. Global YOLOv8 classification weights converged across all 3 diverse industrial defect domains with maximum privacy preservation.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Core Feature 3: Interactive Multi-Factory Edge Topology (Live FL Simulation) -->
+    <!-- SECTION 2: Interactive Federated Edge Mesh & Aggregation Simulation -->
     <section class="section topology-section" id="topology-section">
       <div class="section-header">
         <div class="section-title-wrap">
-          <span class="section-eyebrow">EDGE-TO-CLOUD TOPOLOGY</span>
+          <span class="section-eyebrow">EDGE-TO-CLOUD FEDERATION</span>
           <h2 class="section-title">Federated Edge Mesh & Aggregation Hub</h2>
         </div>
         <p class="section-desc">
-          Live visualization of the 3 industrial edge client nodes and the central Flower FedAvg server. Click <strong>"Simulate Aggregation Round"</strong> to observe noise injection and gradient transmission.
+          3 edge manufacturing clients collaboratively train global YOLOv8 parameters using Flower FedAvg. Click <strong>"Simulate Aggregation Round"</strong> to observe gradient transmission and differential privacy noise injection.
         </p>
       </div>
 
       <div class="topology-container glass-card">
-        <!-- Interactive Trigger Button -->
         <div class="topology-action-bar">
-          <button class="btn-action-primary" id="btn-simulate-round">
+          <button type="button" class="btn-action-primary" id="btn-simulate-round">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
             <span>Simulate Federated Aggregation Round</span>
           </button>
-          <div class="sim-status-banner" id="sim-status-banner">
+          <div class="sim-status-banner">
             <span class="status-pulse"></span>
             <span id="sim-status-text">Network Idle • Weights Synchronized (Round 10)</span>
           </div>
         </div>
 
-        <!-- Visual Network Nodes Diagram -->
+        <!-- 3 Factory Nodes -->
         <div class="network-diagram-wrap">
-          <!-- 3 Edge Client Cards -->
           <div class="edge-nodes-row">
-            <!-- Factory A -->
             <div class="factory-node-card" id="node-factory-a">
               <div class="node-badge">EDGE NODE A</div>
               <h3 class="node-name">Factory A (Metal Nuts)</h3>
@@ -495,7 +345,6 @@
               <div class="node-port">Tx: Weight &Delta;W (Encrypted)</div>
             </div>
 
-            <!-- Factory B -->
             <div class="factory-node-card" id="node-factory-b">
               <div class="node-badge">EDGE NODE B</div>
               <h3 class="node-name">Factory B (Transistors)</h3>
@@ -508,7 +357,6 @@
               <div class="node-port">Tx: Weight &Delta;W (Encrypted)</div>
             </div>
 
-            <!-- Factory C -->
             <div class="factory-node-card" id="node-factory-c">
               <div class="node-badge">EDGE NODE C</div>
               <h3 class="node-name">Factory C (Carpet & Fabric)</h3>
@@ -522,17 +370,11 @@
             </div>
           </div>
 
-          <!-- Connecting Signal Tracks & Animated Data Packets -->
+          <!-- Animated Data Transmission Tracks -->
           <div class="transmission-tracks" id="transmission-tracks" aria-hidden="true">
-            <div class="track-line track-a">
-              <div class="data-packet" id="packet-a"></div>
-            </div>
-            <div class="track-line track-b">
-              <div class="data-packet" id="packet-b"></div>
-            </div>
-            <div class="track-line track-c">
-              <div class="data-packet" id="packet-c"></div>
-            </div>
+            <div class="track-line track-a"><div class="data-packet" id="packet-a"></div></div>
+            <div class="track-line track-b"><div class="data-packet" id="packet-b"></div></div>
+            <div class="track-line track-c"><div class="data-packet" id="packet-c"></div></div>
           </div>
 
           <!-- Central Server Node -->
@@ -550,11 +392,80 @@
       </div>
     </section>
 
-    <!-- Core Feature 4: Cryptographic & Privacy Guarantees -->
+    <!-- SECTION 3: Differential Privacy Accountant & Curves -->
+    <section class="section metrics-section" id="metrics-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-eyebrow">MATHEMATICAL PRIVACY ACCOUNTANT</span>
+          <h2 class="section-title">Differential Privacy & Convergence Curves</h2>
+        </div>
+        <p class="section-desc">
+          Telemetry from the 10 federated training rounds recorded in <code>server/logs/training_log.json</code>. Each round strictly adds $\epsilon = 0.5$ noise budget to satisfy $(\epsilon, \delta)$-Differential Privacy bounds.
+        </p>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="chart-panel glass-card">
+          <div class="chart-header">
+            <div>
+              <span class="chart-title">Cumulative Privacy Budget Consumption (&epsilon;)</span>
+              <span class="chart-sub">&epsilon; vs Federated Round (Flower FedAvg)</span>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item"><span class="legend-dot dot-actual"></span>Cumulative &epsilon;</div>
+              <div class="legend-item"><span class="legend-dot dot-limit"></span>Privacy Limit (5.0)</div>
+            </div>
+          </div>
+
+          <div class="canvas-chart-container" id="chart-container">
+            <canvas id="dp-chart-canvas" width="700" height="280"></canvas>
+            <div class="chart-tooltip" id="chart-tooltip" style="display: none;"></div>
+          </div>
+
+          <div class="chart-footer-metrics">
+            <div class="cf-metric"><span class="cf-label">Per-Round Budget</span><span class="cf-value">&Delta;&epsilon; = 0.50</span></div>
+            <div class="cf-metric"><span class="cf-label">Total Rounds</span><span class="cf-value">10 Rounds</span></div>
+            <div class="cf-metric"><span class="cf-label">Delta Bound</span><span class="cf-value">&delta; = 1.0 &times; 10<sup>-5</sup></span></div>
+            <div class="cf-metric"><span class="cf-label">Client Participation</span><span class="cf-value">100% (3/3 Nodes)</span></div>
+          </div>
+        </div>
+
+        <div class="rounds-stepper-panel glass-card">
+          <div class="stepper-header">
+            <span class="stepper-title">Federated Round Inspector</span>
+            <span class="stepper-sub">Scrub through training epochs</span>
+          </div>
+
+          <div class="round-scrubber-control">
+            <div class="round-number-display">
+              <span class="rn-label">ACTIVE ROUND:</span>
+              <span class="rn-value" id="scrubber-round-num">Round 10</span>
+            </div>
+            <input type="range" id="round-slider" min="1" max="10" value="10" step="1" class="styled-slider">
+          </div>
+
+          <div class="round-log-details" id="round-log-details">
+            <div class="log-row"><span class="log-label">Participating Clients:</span><span class="log-val" id="log-num-clients">3 (Factory A, B, C)</span></div>
+            <div class="log-row"><span class="log-label">Cumulative Epsilon (&epsilon;):</span><span class="log-val text-purple" id="log-epsilon">5.00</span></div>
+            <div class="log-row"><span class="log-label">Round Status:</span><span class="log-val text-success" id="log-failures">0 Failures (Nominal)</span></div>
+            <div class="log-row"><span class="log-label">Weights Transmitted:</span><span class="log-val" id="log-weight-tx">3 &times; 2.9 MB = 8.7 MB (&Delta;W)</span></div>
+          </div>
+
+          <div class="round-annotation-box">
+            <div class="annotation-badge">ROUND 10 MILESTONE</div>
+            <p class="annotation-text" id="round-annotation-text">
+              Final global aggregation completed. Global YOLOv8 classification weights converged across all 3 diverse industrial defect domains with maximum privacy preservation.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Architecture & Cryptography -->
     <section class="section architecture-section" id="architecture-section">
       <div class="section-header">
         <div class="section-title-wrap">
-          <span class="section-eyebrow">DEFENSE-IN-DEPTH</span>
+          <span class="section-eyebrow">SECURITY GUARANTEES</span>
           <h2 class="section-title">Cryptographic Privacy Architecture</h2>
         </div>
         <p class="section-desc">
@@ -571,9 +482,7 @@
             </svg>
           </div>
           <h3 class="pillar-title">1. Local Data Isolation</h3>
-          <p class="pillar-text">
-            Proprietary high-resolution camera feeds and defect images never leave factory LAN perimeters. Training loops execute completely on on-premises edge compute.
-          </p>
+          <p class="pillar-text">Proprietary camera feeds and defect images never leave factory LAN perimeters. Model training loops execute completely on on-premises edge compute.</p>
         </div>
 
         <div class="pillar-card glass-card">
@@ -583,9 +492,7 @@
             </svg>
           </div>
           <h3 class="pillar-title">2. Gaussian DP Perturbation</h3>
-          <p class="pillar-text">
-            Gradient updates are clipped to $L_2$-norm bound $C$ and injected with calibrated Gaussian noise ($\sigma = 0.8$), ensuring mathematically bounded $(\epsilon, \delta)$ differential privacy.
-          </p>
+          <p class="pillar-text">Gradient updates are clipped to $L_2$-norm bound $C$ and injected with calibrated Gaussian noise ($\sigma = 0.8$), ensuring mathematically bounded $(\epsilon, \delta)$ differential privacy.</p>
         </div>
 
         <div class="pillar-card glass-card">
@@ -595,9 +502,7 @@
             </svg>
           </div>
           <h3 class="pillar-title">3. DLG Inversion Immunity</h3>
-          <p class="pillar-text">
-            By injecting differential privacy noise before transmission, malicious reconstructive gradient inversion attacks (such as Deep Leakage from Gradients) recover only pure random noise.
-          </p>
+          <p class="pillar-text">By injecting differential privacy noise before transmission, reconstructive gradient inversion attacks recover only random mathematical entropy.</p>
         </div>
 
         <div class="pillar-card glass-card">
@@ -607,25 +512,13 @@
             </svg>
           </div>
           <h3 class="pillar-title">4. Flower FedAvg Aggregation</h3>
-          <p class="pillar-text">
-            The central server computes coordinate-wise federated parameter aggregation, allowing cross-factory knowledge transfer without storing or reconstructing individual data records.
-          </p>
+          <p class="pillar-text">The central server computes coordinate-wise federated parameter aggregation, facilitating cross-factory knowledge transfer without storing raw images.</p>
         </div>
       </div>
     </section>
 
-    <!-- Research & Author Profile Section -->
+    <!-- SECTION 5: Research & Author Profile -->
     <section class="section research-section" id="research-section">
-      <div class="section-header">
-        <div class="section-title-wrap">
-          <span class="section-eyebrow">RESEARCH TRACK & PORTFOLIO</span>
-          <h2 class="section-title">Federated Learning Research Portfolio</h2>
-        </div>
-        <p class="section-desc">
-          This system is part of a comprehensive federated learning research initiative engineered by <strong>Atharv Dorle (THUNDER)</strong>.
-        </p>
-      </div>
-
       <div class="research-grid">
         <div class="author-card glass-card">
           <div class="author-avatar-wrap">
@@ -645,16 +538,16 @@
         </div>
 
         <div class="papers-card glass-card">
-          <h3 class="papers-title">Related Research Projects</h3>
+          <h3 class="papers-title">Related Research Track</h3>
           <div class="paper-item">
             <div class="paper-badge">Preprint #52853</div>
             <a href="https://github.com/Atharv-725/adaptive-fl-paper" target="_blank" rel="noopener noreferrer" class="paper-name">Adaptive FL + Concept Drift</a>
-            <p class="paper-desc">Federated learning with drift detection and parameter adaptation for non-IID edge streams.</p>
+            <p class="paper-desc">Federated learning with drift detection for non-IID edge streams.</p>
           </div>
           <div class="paper-item">
             <div class="paper-badge badge-blue">IEEE Target</div>
             <a href="https://github.com/Atharv-725/federated-etl-framework" target="_blank" rel="noopener noreferrer" class="paper-name">FedETL Framework</a>
-            <p class="paper-desc">Privacy-preserving federated extract, transform, load pipeline with homomorphic aggregation.</p>
+            <p class="paper-desc">Privacy-preserving federated extract, transform, load pipeline.</p>
           </div>
         </div>
       </div>
@@ -666,10 +559,10 @@
     <div class="footer-container">
       <div class="footer-left">
         <span class="footer-brand">FEDERATED CV QUALITY CONTROL</span>
-        <span class="footer-sub">Privacy-Preserving Industrial Defect Detection</span>
+        <span class="footer-sub">Interactive Industrial Defect Detection & Edge Vision Studio</span>
       </div>
       <div class="footer-right">
-        <span>MIT License • Built for Vercel & Edge Deployment</span>
+        <span>MIT License • Production Deployment</span>
       </div>
     </div>
   </footer>
