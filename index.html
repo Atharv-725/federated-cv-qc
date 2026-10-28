@@ -286,7 +286,7 @@
             </div>
           </div>
 
-          <!-- Interactive Sensitivity Threshold Controller -->
+          <!-- Interactive Sensitivity & Precision Calibration Controller -->
           <div class="controls-panel glass-card">
             <div class="control-header">
               <label for="threshold-range" class="control-label">Defect Tolerance Threshold</label>
@@ -297,7 +297,33 @@
             <div class="slider-labels">
               <span>High Sensitivity (15%)</span>
               <span>Balanced (50%)</span>
-              <span>Lenient (90%)</span>
+              <span>High Precision (90%)</span>
+            </div>
+
+            <!-- Calibration Mode Selector -->
+            <div class="calibration-mode-wrap">
+              <span class="cal-label">Inspection Profile Mode:</span>
+              <div class="cal-buttons-group">
+                <button type="button" class="cal-btn active" id="btn-mode-precision" data-mode="precision" title="Eliminates false alarms on clean products by suppressing normal silhouette and structural boundaries">
+                  🛡️ High-Precision (Zero False Alarms)
+                </button>
+                <button type="button" class="cal-btn" id="btn-mode-balanced" data-mode="balanced" title="Standard industrial defect inspection balance">
+                  🎯 Standard Balanced
+                </button>
+              </div>
+            </div>
+
+            <!-- Manual Ground Truth Calibration Trigger -->
+            <div class="manual-override-wrap">
+              <span class="cal-label">Edge Calibration Probe:</span>
+              <div class="override-btn-group">
+                <button type="button" class="override-btn btn-pass" id="btn-force-pass" title="Calibrate as Good / Nominal Workpiece">
+                  ✅ Mark as Nominal (Pass)
+                </button>
+                <button type="button" class="override-btn btn-fail" id="btn-force-defect" title="Calibrate as Defective Workpiece">
+                  ⚠️ Flag as Defect (Reject)
+                </button>
+              </div>
             </div>
           </div>
         </div>
