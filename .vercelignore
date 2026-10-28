@@ -1,0 +1,10 @@
+# Ignore Python manifests & ML binaries so Vercel treats this as a pure static web dashboard
+requirements.txt
+*.py
+.venv/
+server/
+clients/
+data/
+runs/
+*.pt
+.git/
