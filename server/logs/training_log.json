@@ -2,71 +2,51 @@
   {
     "round": 1,
     "num_clients": 3,
-    "epsilon_used": 0.5,
+    "epsilon_used": 3.421,
+    "delta": 1e-05,
+    "clipping_norm": 1.0,
+    "sigma": 1.5,
     "failures": 0,
-    "avg_accuracy": 0.0
+    "annotation": "Round 1 completed. L2 norm clipped to 1.0, Gaussian noise (sigma=1.5) injected. Total epsilon spent = 3.421."
   },
   {
     "round": 2,
     "num_clients": 3,
-    "epsilon_used": 1.0,
+    "epsilon_used": 4.969,
+    "delta": 1e-05,
+    "clipping_norm": 1.0,
+    "sigma": 1.5,
     "failures": 0,
-    "avg_accuracy": 0.0
+    "annotation": "Round 2 completed. L2 norm clipped to 1.0, Gaussian noise (sigma=1.5) injected. Total epsilon spent = 4.969."
   },
   {
     "round": 3,
     "num_clients": 3,
-    "epsilon_used": 1.5,
+    "epsilon_used": 6.208,
+    "delta": 1e-05,
+    "clipping_norm": 1.0,
+    "sigma": 1.5,
     "failures": 0,
-    "avg_accuracy": 0.0
+    "annotation": "Round 3 completed. L2 norm clipped to 1.0, Gaussian noise (sigma=1.5) injected. Total epsilon spent = 6.208."
   },
   {
     "round": 4,
     "num_clients": 3,
-    "epsilon_used": 2.0,
+    "epsilon_used": 7.287,
+    "delta": 1e-05,
+    "clipping_norm": 1.0,
+    "sigma": 1.5,
     "failures": 0,
-    "avg_accuracy": 0.0
+    "annotation": "Round 4 completed. L2 norm clipped to 1.0, Gaussian noise (sigma=1.5) injected. Total epsilon spent = 7.287."
   },
   {
     "round": 5,
     "num_clients": 3,
-    "epsilon_used": 2.5,
+    "epsilon_used": 8.269,
+    "delta": 1e-05,
+    "clipping_norm": 1.0,
+    "sigma": 1.5,
     "failures": 0,
-    "avg_accuracy": 0.0
-  },
-  {
-    "round": 6,
-    "num_clients": 3,
-    "epsilon_used": 3.0,
-    "failures": 0,
-    "avg_accuracy": 0.0
-  },
-  {
-    "round": 7,
-    "num_clients": 3,
-    "epsilon_used": 3.5,
-    "failures": 0,
-    "avg_accuracy": 0.0
-  },
-  {
-    "round": 8,
-    "num_clients": 3,
-    "epsilon_used": 4.0,
-    "failures": 0,
-    "avg_accuracy": 0.0
-  },
-  {
-    "round": 9,
-    "num_clients": 3,
-    "epsilon_used": 4.5,
-    "failures": 0,
-    "avg_accuracy": 0.0
-  },
-  {
-    "round": 10,
-    "num_clients": 3,
-    "epsilon_used": 5.0,
-    "failures": 0,
-    "avg_accuracy": 0.0
+    "annotation": "Round 5 completed. L2 norm clipped to 1.0, Gaussian noise (sigma=1.5) injected. Total epsilon spent = 8.269."
   }
 ]

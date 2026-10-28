@@ -1,96 +1,122 @@
 /**
- * FEDERATED CV QUALITY CONTROL — HIGH-PRECISION QC STUDIO & INFERENCE ENGINE
- * Zero-False-Alarm Calibration • Pixel Anomaly Detection • Flower FedAvg & DP
+ * FEDERATED CV QUALITY CONTROL — HIGH-PRECISION IN-BROWSER QC STUDIO
+ * Client-Side YOLOv8n-cls ONNX Inference • Zero Hardcoded Predictions
+ * Calibrated Differential Privacy FedAvg (Rényi DP Accountant)
  */
 
 (function () {
   'use strict';
 
-  // Benchmark factory samples for quick testing
-  const BENCHMARK_SAMPLES = {
-    bent_nut: {
-      name: 'bent_nut_000.png',
-      src: 'samples/factory_a_bent.jpg',
-      type: 'defect',
-      anomaly: 'Flange Deformation / Thread Warp',
-      actuator: 'DIVERT TO SCRAP BIN 2',
-      defaultConf: 97.4,
-      target: { x: 140, y: 260, r: 70 }
+  // Available factory neural networks (ONNX)
+  const MODEL_CONFIGS = {
+    factory_a: {
+      name: 'Factory A (Metal Nut)',
+      domain: 'metal_nut',
+      path: 'models/factory_a.onnx',
+      defaultThreshold: 50,
+      description: 'MVTec AD metal_nut • Precision: 100%, F1: 0.7917, AUROC: 0.9875'
     },
-    scratch_nut: {
-      name: 'scratch_nut_000.png',
-      src: 'samples/factory_a_scratch.jpg',
-      type: 'defect',
-      anomaly: 'Tooling Surface Scratch',
-      actuator: 'DIVERT TO REWORK BIN',
-      defaultConf: 96.2,
-      target: { x: 215, y: 160, r: 60 }
+    factory_b: {
+      name: 'Factory B (Transistor)',
+      domain: 'transistor',
+      path: 'models/factory_b.onnx',
+      defaultThreshold: 35,
+      description: 'MVTec AD transistor • Precision: 100%, Acc: 80.95%, AUROC: 0.8639'
     },
-    broken_lead: {
-      name: 'bent_lead_transistor.png',
-      src: 'samples/factory_b_bent_lead.jpg',
-      type: 'defect',
-      anomaly: 'Lead 3 Coplanarity Deviation',
-      actuator: 'DIVERT TO REJECT BIN 1',
-      defaultConf: 98.7,
-      target: { x: 280, y: 240, r: 65 }
+    factory_c: {
+      name: 'Factory C (Carpet)',
+      domain: 'carpet',
+      path: 'models/factory_c.onnx',
+      defaultThreshold: 50,
+      description: 'MVTec AD carpet • Acc: 85.37%, Precision: 88.89%, Recall: 88.89%, AUROC: 0.8836'
     },
-    carpet_hole: {
-      name: 'carpet_puncture_hole.png',
-      src: 'samples/factory_c_hole.jpg',
-      type: 'defect',
-      anomaly: 'Fabric Weave Puncture Hole',
-      actuator: 'SHEAR & FLAG ROLL',
-      defaultConf: 98.9,
-      target: { x: 200, y: 190, r: 80 }
-    },
-    good_nut: {
-      name: 'nominal_flawless_nut.png',
-      src: 'samples/factory_a_good.jpg',
-      type: 'good',
-      anomaly: 'Nominal Surface (Meets ISO-4032)',
-      actuator: 'APPROVED FOR PACKAGING',
-      defaultConf: 0.8,
-      target: null
-    },
-    good_chip: {
-      name: 'pristine_transistor_to92.png',
-      src: 'samples/factory_b_good.jpg',
-      type: 'good',
-      anomaly: 'Nominal Case (JEDEC Compliant)',
-      actuator: 'PASS TO TAPE-AND-REEL',
-      defaultConf: 0.5,
-      target: null
+    global_fed: {
+      name: 'DP-FedAvg Global',
+      domain: 'multi_domain',
+      path: 'models/global_fed.onnx',
+      defaultThreshold: 50,
+      description: 'Flower FedAvg + Differential Privacy (R5, ε=8.27, δ=1e-5)'
     }
   };
 
-  // DP Training Log (from server/logs/training_log.json)
+  // Benchmark factory samples
+  const BENCHMARK_SAMPLES = {
+    bent_nut: {
+      name: 'factory_a_bent.jpg',
+      src: 'samples/factory_a_bent.jpg',
+      model: 'factory_a',
+      label: 'Bent Nut (Defect)',
+      defaultThreshold: 50
+    },
+    color_nut: {
+      name: 'factory_a_color.jpg',
+      src: 'samples/factory_a_color.jpg',
+      model: 'factory_a',
+      label: 'Color Stain Nut (Defect)',
+      defaultThreshold: 50
+    },
+    broken_lead: {
+      name: 'factory_b_bent_lead.jpg',
+      src: 'samples/factory_b_bent_lead.jpg',
+      model: 'factory_b',
+      label: 'Bent Lead IC (Defect)',
+      defaultThreshold: 35
+    },
+    carpet_hole: {
+      name: 'factory_c_hole.jpg',
+      src: 'samples/factory_c_hole.jpg',
+      model: 'factory_c',
+      label: 'Carpet Hole (Defect)',
+      defaultThreshold: 50
+    },
+    good_nut: {
+      name: 'factory_a_good.jpg',
+      src: 'samples/factory_a_good.jpg',
+      model: 'factory_a',
+      label: 'Pristine Nut (Pass)',
+      defaultThreshold: 50
+    },
+    good_chip: {
+      name: 'factory_b_good.jpg',
+      src: 'samples/factory_b_good.jpg',
+      model: 'factory_b',
+      label: 'Pristine IC (Pass)',
+      defaultThreshold: 35
+    },
+    good_carpet: {
+      name: 'factory_c_good.jpg',
+      src: 'samples/factory_c_good.jpg',
+      model: 'factory_c',
+      label: 'Pristine Carpet (Pass)',
+      defaultThreshold: 50
+    }
+  };
+
+  // Real Differential Privacy Training Log (from server/logs/training_log.json)
   const TRAINING_ROUNDS_DATA = [
-    { round: 1, clients: 3, epsilon: 0.5, failures: 0, annotation: "Cold-start FedAvg round. Global weights broadcast to 3 factory edge clients." },
-    { round: 2, clients: 3, epsilon: 1.0, failures: 0, annotation: "First gradient clipping pass (L2 norm <= 1.0). DP Gaussian noise injected at edge." },
-    { round: 3, clients: 3, epsilon: 1.5, failures: 0, annotation: "Model weights beginning inter-factory feature transfer across dissimilar defect domains." },
-    { round: 4, clients: 3, epsilon: 2.0, failures: 0, annotation: "Fastener and leadframe boundary features stabilizing in shared representation space." },
-    { round: 5, clients: 3, epsilon: 2.5, failures: 0, annotation: "Midpoint validation. Client loss stabilizes across non-IID local partitions." },
-    { round: 6, clients: 3, epsilon: 3.0, failures: 0, annotation: "Differential privacy cumulative epsilon reaches 3.0. Zero client drops." },
-    { round: 7, clients: 3, epsilon: 3.5, failures: 0, annotation: "High-gradient anomaly patterns generalized into global classification head." },
-    { round: 8, clients: 3, epsilon: 4.0, failures: 0, annotation: "Differential privacy noise-to-signal ratio optimal for cross-domain recall." },
-    { round: 9, clients: 3, epsilon: 4.5, failures: 0, annotation: "Final fine-tuning iterations. Learning rate decayed to 0.0001." },
-    { round: 10, clients: 3, epsilon: 5.0, failures: 0, annotation: "Final global model converged. Total epsilon spent = 5.0 (bounded by delta = 1e-5)." }
+    { round: 1, clients: 3, epsilon: 3.421, delta: 1e-5, clipping: 1.0, sigma: 1.5, annotation: "Round 1 completed. L2 norm clipped to 1.0, Gaussian noise (sigma=1.5) injected. Total epsilon spent = 3.421." },
+    { round: 2, clients: 3, epsilon: 4.969, delta: 1e-5, clipping: 1.0, sigma: 1.5, annotation: "Round 2 completed. Inter-factory FedAvg parameter aggregation across non-IID edge nodes. Cumulative epsilon = 4.969." },
+    { round: 3, clients: 3, epsilon: 6.208, delta: 1e-5, clipping: 1.0, sigma: 1.5, annotation: "Round 3 completed. Multi-domain weight updates aggregated with Rényi DP analytical composition. Epsilon = 6.208." },
+    { round: 4, clients: 3, epsilon: 7.287, delta: 1e-5, clipping: 1.0, sigma: 1.5, annotation: "Round 4 completed. Noise accumulation across heterogeneous features. Cumulative epsilon spent = 7.287." },
+    { round: 5, clients: 3, epsilon: 8.269, delta: 1e-5, clipping: 1.0, sigma: 1.5, annotation: "Round 5 completed. Final global model converged under strict (ε=8.27, δ=1e-5) Differential Privacy bound." }
   ];
 
   // Active App State
   const state = {
     currentImageName: 'factory_a_bent.jpg',
     currentSource: 'samples/factory_a_bent.jpg',
+    activeModel: 'factory_a',
     viewMode: 'raw', // 'raw' | 'cam' | 'edge' | 'mask'
     sensitivityThreshold: 50, // %
-    calibrationMode: 'precision', // 'precision' (zero false alarms) | 'balanced'
     isCustomUpload: false,
-    manualOverride: null, // null | 'good' | 'defect'
-    cvResults: null,
-    selectedRound: 10,
+    inferenceResults: null,
+    selectedRound: 5,
     isSimulatingRound: false
   };
+
+  // ONNX Runtime Web session cache
+  const sessionCache = {};
+  let isModelLoading = false;
 
   // DOM Elements
   const els = {
@@ -99,6 +125,7 @@
     primaryDropzone: document.getElementById('primary-dropzone'),
     btnBrowseTrigger: document.getElementById('btn-browse-trigger'),
     benchmarkPillsGroup: document.getElementById('benchmark-pills-group'),
+    factoryModelPills: document.getElementById('factory-model-pills'),
 
     // Viewport
     workpieceImage: document.getElementById('workpiece-image'),
@@ -140,11 +167,10 @@
     thresholdRange: document.getElementById('threshold-range'),
     thresholdDisplay: document.getElementById('threshold-display'),
 
-    // Calibration & Override
-    btnModePrecision: document.getElementById('btn-mode-precision'),
-    btnModeBalanced: document.getElementById('btn-mode-balanced'),
-    btnForcePass: document.getElementById('btn-force-pass'),
-    btnForceDefect: document.getElementById('btn-force-defect'),
+    // Presets
+    btnThreshNut: document.getElementById('btn-thresh-nut'),
+    btnThreshTransistor: document.getElementById('btn-thresh-transistor'),
+    btnThreshCarpet: document.getElementById('btn-thresh-carpet'),
 
     // Chart & Stepper
     dpChartCanvas: document.getElementById('dp-chart-canvas'),
@@ -176,9 +202,10 @@
   function init() {
     setupFileIngestion();
     setupBenchmarkPills();
+    setupModelSelectorPills();
     setupViewModeTabs();
     setupSensitivityControl();
-    setupCalibrationControls();
+    setupThresholdPresets();
     setupPixelProbe();
     setupExportButton();
     setupChart();
@@ -186,33 +213,29 @@
     setupSimulation();
 
     // Load initial sample
-    loadImageSource('samples/factory_a_bent.jpg', 'factory_a_bent.jpg', false);
+    loadSample('bent_nut');
   }
 
   // =========================================================================
-  // 1. BULLETPROOF IMAGE INGESTION
+  // 1. BULLETPROOF IMAGE INGESTION & SAMPLE SWITCHING
   // =========================================================================
 
   function setupFileIngestion() {
-    // Browse button click
     els.btnBrowseTrigger.addEventListener('click', (e) => {
       e.stopPropagation();
       els.primaryFileInput.click();
     });
 
-    // Clicking anywhere on the dropzone triggers file picker
     els.primaryDropzone.addEventListener('click', () => {
       els.primaryFileInput.click();
     });
 
-    // File input change
     els.primaryFileInput.addEventListener('change', (e) => {
       if (e.target.files && e.target.files.length > 0) {
         handleIncomingFile(e.target.files[0]);
       }
     });
 
-    // Drag & Drop
     ['dragenter', 'dragover'].forEach(name => {
       els.primaryDropzone.addEventListener(name, (e) => {
         e.preventDefault();
@@ -251,498 +274,266 @@
       }
     });
 
-    // Global Clipboard Paste (Ctrl+V)
+    // Paste from clipboard
     window.addEventListener('paste', (e) => {
-      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf('image') !== -1) {
-          const blob = items[i].getAsFile();
-          handleIncomingFile(blob, 'pasted_inspection_image.png');
-          break;
+      if (e.clipboardData && e.clipboardData.items) {
+        for (let i = 0; i < e.clipboardData.items.length; i++) {
+          const item = e.clipboardData.items[i];
+          if (item.type.indexOf('image') !== -1) {
+            const blob = item.getAsFile();
+            handleIncomingFile(blob, 'pasted_workpiece.png');
+            break;
+          }
         }
       }
     });
   }
 
   function handleIncomingFile(file, fallbackName) {
-    if (!file) return;
-    const name = file.name || fallbackName || 'uploaded_workpiece.png';
-    state.manualOverride = null; // Reset manual override on new file
+    if (!file || !file.type.startsWith('image/')) {
+      alert('Please select a valid image file (PNG, JPG, WEBP).');
+      return;
+    }
 
+    const name = file.name || fallbackName || 'custom_upload.jpg';
     const reader = new FileReader();
-    reader.onload = function (event) {
-      loadImageSource(event.target.result, name, true);
+    reader.onload = function (evt) {
+      loadImageSource(evt.target.result, name, true);
     };
     reader.readAsDataURL(file);
   }
 
   function setupBenchmarkPills() {
-    const pills = els.benchmarkPillsGroup.querySelectorAll('.pill-btn');
-    pills.forEach(pill => {
-      pill.addEventListener('click', () => {
-        pills.forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        state.manualOverride = null;
-
-        const sampleKey = pill.dataset.sample;
-        const sample = BENCHMARK_SAMPLES[sampleKey];
-        if (sample) {
-          loadImageSource(sample.src, sample.name, false, sample);
-        }
-      });
+    if (!els.benchmarkPillsGroup) return;
+    els.benchmarkPillsGroup.addEventListener('click', (e) => {
+      const btn = e.target.closest('.pill-btn');
+      if (!btn) return;
+      const sampleKey = btn.dataset.sample;
+      if (sampleKey && BENCHMARK_SAMPLES[sampleKey]) {
+        els.benchmarkPillsGroup.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadSample(sampleKey);
+      }
     });
   }
 
-  // =========================================================================
-  // 2. IMAGE LOADER & SCAN TRIGGER
-  // =========================================================================
+  function loadSample(sampleKey) {
+    const s = BENCHMARK_SAMPLES[sampleKey];
+    if (!s) return;
+    
+    // Switch active model to matching domain
+    setActiveModel(s.model);
 
-  function loadImageSource(src, fileName, isCustom, presetSample) {
+    // Apply category recommended threshold
+    setThreshold(s.defaultThreshold);
+
+    loadImageSource(s.src, s.name, false);
+  }
+
+  function setupModelSelectorPills() {
+    if (!els.factoryModelPills) return;
+    els.factoryModelPills.addEventListener('click', (e) => {
+      const btn = e.target.closest('.pill-btn');
+      if (!btn) return;
+      const modelKey = btn.dataset.model;
+      if (modelKey && MODEL_CONFIGS[modelKey]) {
+        setActiveModel(modelKey);
+        // Re-run inference with the new model on the currently displayed image
+        executeInferenceOnCurrent();
+      }
+    });
+  }
+
+  function setActiveModel(modelKey) {
+    state.activeModel = modelKey;
+    if (els.factoryModelPills) {
+      els.factoryModelPills.querySelectorAll('.pill-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.model === modelKey);
+      });
+    }
+  }
+
+  function loadImageSource(src, filename, isCustom) {
     state.currentSource = src;
-    state.currentImageName = fileName;
+    state.currentImageName = filename;
     state.isCustomUpload = isCustom;
-    els.currentImageName.textContent = fileName;
 
-    // Show scanner overlay
-    els.scanOverlayCurtain.style.display = 'flex';
-    els.scannerStatusText.textContent = `Calibrating & Analyzing ${fileName}...`;
-    els.laserScanner.classList.add('scanner-active');
+    if (els.currentImageName) {
+      els.currentImageName.textContent = filename;
+    }
 
-    const img = new Image();
+    triggerScannerAnimation();
+
+    const img = els.workpieceImage;
     img.crossOrigin = 'anonymous';
-
     img.onload = function () {
-      els.workpieceImage.src = src;
-
-      // Execute Computer Vision Pixel Analysis
-      const startTime = performance.now();
-      const cvResults = runComputerVisionAnalysis(img, presetSample);
-      const latency = (performance.now() - startTime + Math.random() * 3 + 8).toFixed(1);
-
-      state.cvResults = cvResults;
-      state.cvResults.latency = `${latency} ms`;
-
-      // Update resolution label
-      const resLabel = document.getElementById('vf-resolution');
-      if (resLabel) resLabel.textContent = `${img.naturalWidth || 400} × ${img.naturalHeight || 400} px`;
-
-      // Render Active View Mode
-      renderCurrentViewMode();
-
-      // Update HUD Metrology
-      updateMetrologyHUD(state.cvResults);
-
-      setTimeout(() => {
-        els.scanOverlayCurtain.style.display = 'none';
-        els.laserScanner.classList.remove('scanner-active');
-      }, 450);
+      executeInferenceOnCurrent();
     };
-
     img.onerror = function () {
-      els.scanOverlayCurtain.style.display = 'none';
-      els.laserScanner.classList.remove('scanner-active');
-      alert(`Could not load image: ${fileName}`);
+      hideCurtain();
+      console.error('Failed to load image:', src);
     };
-
     img.src = src;
   }
 
   // =========================================================================
-  // 3. HIGH-PRECISION COMPUTER VISION DEFECT DETECTOR & PERCEPTUAL FINGERPRINT ENGINE
+  // 2. REAL ONNX RUNTIME WEB INFERENCE ENGINE
   // =========================================================================
 
-  /**
-   * Fast Perceptual Difference Hash (dHash 64-bit)
-   * Converts workpiece image down to 9x8 luminance gradient to produce 16-hex fingerprint
-   */
-  function computeImageDHash(imgElement) {
+  async function getModelSession(modelKey) {
+    if (sessionCache[modelKey]) return sessionCache[modelKey];
+
+    if (typeof ort === 'undefined') {
+      throw new Error('ONNX Runtime Web library (ort) is not available.');
+    }
+
+    // Configure WASM paths and ensure single-threaded execution for universal browser support
+    ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/';
+    ort.env.wasm.numThreads = 1;
+
+    const cfg = MODEL_CONFIGS[modelKey] || MODEL_CONFIGS.factory_a;
+    showCurtain(`Loading ${cfg.name} Neural Weights...`);
+    isModelLoading = true;
+
     try {
-      const c = document.createElement('canvas');
-      c.width = 9;
-      c.height = 8;
-      const ctx = c.getContext('2d');
-      ctx.drawImage(imgElement, 0, 0, 9, 8);
-      const data = ctx.getImageData(0, 0, 9, 8).data;
-
-      const gray = new Float32Array(72);
-      for (let i = 0; i < 72; i++) {
-        const idx = i * 4;
-        gray[i] = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
-      }
-
-      let hexStr = '';
-      let decVal = 0;
-      let bitIdx = 0;
-      for (let y = 0; y < 8; y++) {
-        for (let x = 0; x < 8; x++) {
-          const left = gray[y * 9 + x];
-          const right = gray[y * 9 + (x + 1)];
-          if (right > left) {
-            decVal += (1 << (bitIdx % 8));
-          }
-          bitIdx++;
-          if (bitIdx % 8 === 0) {
-            hexStr += decVal.toString(16).padStart(2, '0');
-            decVal = 0;
-          }
-        }
-      }
-      return hexStr;
-    } catch (e) {
-      console.warn('dHash computation error:', e);
-      return null;
+      const session = await ort.InferenceSession.create(cfg.path, {
+        executionProviders: ['wasm']
+      });
+      sessionCache[modelKey] = session;
+      return session;
+    } finally {
+      isModelLoading = false;
+      hideCurtain();
     }
   }
 
-  /**
-   * Hamming distance between two 64-bit hex hashes
-   */
-  function hammingDistance(h1, h2) {
-    if (!h1 || !h2 || h1.length !== h2.length) return 64;
-    let dist = 0;
-    for (let i = 0; i < h1.length; i += 2) {
-      const b1 = parseInt(h1.substr(i, 2), 16);
-      const b2 = parseInt(h2.substr(i, 2), 16);
-      let xor = b1 ^ b2;
-      while (xor > 0) {
-        dist += xor & 1;
-        xor >>= 1;
-      }
+  function preprocessImageToChwTensor(imgElement) {
+    const offscreen = document.createElement('canvas');
+    offscreen.width = 224;
+    offscreen.height = 224;
+    const ctx = offscreen.getContext('2d');
+    ctx.drawImage(imgElement, 0, 0, 224, 224);
+
+    const imgData = ctx.getImageData(0, 0, 224, 224).data;
+    const floatArray = new Float32Array(3 * 224 * 224);
+
+    // Convert RGBA to planar CHW normalized in [0.0, 1.0]
+    for (let i = 0; i < 224 * 224; i++) {
+      floatArray[i] = imgData[i * 4] / 255.0; // R plane
+      floatArray[224 * 224 + i] = imgData[i * 4 + 1] / 255.0; // G plane
+      floatArray[2 * 224 * 224 + i] = imgData[i * 4 + 2] / 255.0; // B plane
     }
-    return dist;
+
+    return new ort.Tensor('float32', floatArray, [1, 3, 224, 224]);
   }
 
-  /**
-   * Matches computed dHash against the MVTec ground-truth perceptual signatures
-   */
-  function findDatasetMatch(hash) {
-    const sigs = (typeof window !== 'undefined' && window.DATASET_SIGNATURES) ? window.DATASET_SIGNATURES : (typeof globalThis !== 'undefined' ? globalThis.DATASET_SIGNATURES : null);
-    if (!sigs || !hash) return null;
+  async function executeInferenceOnCurrent() {
+    const img = els.workpieceImage;
+    if (!img.complete || img.naturalWidth === 0) return;
 
-    // Direct exact match
-    if (sigs[hash]) {
-      return { match: sigs[hash], distance: 0, hash: hash };
-    }
+    showCurtain('Running YOLOv8n-cls Neural Inference...');
+    const startTime = performance.now();
 
-    // Nearest Hamming distance neighbor (resilient to browser canvas bilinear scaling differences)
-    let bestMatch = null;
-    let minD = 64;
-    for (const k in sigs) {
-      const d = hammingDistance(hash, k);
-      if (d < minD) {
-        minD = d;
-        bestMatch = sigs[k];
-        if (d === 0) break;
+    try {
+      const session = await getModelSession(state.activeModel);
+      const tensor = preprocessImageToChwTensor(img);
+
+      // Run real ONNX forward pass
+      const feeds = { images: tensor };
+      const output = await session.run(feeds);
+      const latencyMs = Math.max(1.0, performance.now() - startTime);
+
+      const logits = output.output0.data; // Float32Array of length 2 [logit_defect, logit_good]
+      const l0 = logits[0]; // class 0: defect
+      const l1 = logits[1]; // class 1: good
+
+      // Numerically stable Softmax
+      const maxL = Math.max(l0, l1);
+      const e0 = Math.exp(l0 - maxL);
+      const e1 = Math.exp(l1 - maxL);
+      const pDefect = e0 / (e0 + e1);
+      const pGood = e1 / (e0 + e1);
+
+      // Out-of-Distribution (OOD) / Low Confidence Check
+      // A prediction where max certainty is < 58% indicates high entropy ambiguity
+      const maxProb = Math.max(pDefect, pGood);
+      const isOOD = maxProb < 0.58;
+
+      // Extract real Sobel edge gradient map for metrology and spatial energy display
+      const edgeData = computeSobelGradientMap(img);
+
+      state.inferenceResults = {
+        pDefect: pDefect * 100,
+        pGood: pGood * 100,
+        isOOD: isOOD,
+        latencyMs: latencyMs,
+        edgeData: edgeData
+      };
+
+      hideCurtain();
+      updateMetrologyHUD();
+      renderCurrentViewMode();
+
+    } catch (err) {
+      hideCurtain();
+      console.error('Inference error:', err);
+      // Fallback telemetry display
+      if (els.verdictStatusTag) {
+        els.verdictStatusTag.textContent = 'INFERENCE ENGINE INITIALIZING';
+        els.verdictTitle.textContent = 'CHECKING MODEL WEIGHTS';
+        els.verdictDescription.textContent = `Model session loading: ${err.message}. If running locally, ensure files are served via HTTP server.`;
       }
     }
-
-    // Allow up to 3 bits variance for identical visual structures
-    if (minD <= 3 && bestMatch) {
-      return { match: bestMatch, distance: minD };
-    }
-    return null;
   }
 
-  function runComputerVisionAnalysis(imgElement, presetSample) {
-    const canvas = document.createElement('canvas');
-    const targetW = 280;
-    const targetH = 280;
-    canvas.width = targetW;
-    canvas.height = targetH;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(imgElement, 0, 0, targetW, targetH);
+  // =========================================================================
+  // 3. REAL IMAGE GRADIENT METROLOGY (Sobel Operator on Pixels)
+  // =========================================================================
 
-    const imgData = ctx.getImageData(0, 0, targetW, targetH);
+  function computeSobelGradientMap(imgElement) {
+    const w = 280;
+    const h = 280;
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(imgElement, 0, 0, w, h);
+
+    const imgData = ctx.getImageData(0, 0, w, h);
     const data = imgData.data;
+    const gray = new Float32Array(w * h);
 
-    // Compute perceptual dHash signature for dataset ground-truth verification
-    const imgHash = computeImageDHash(imgElement);
-    const datasetMatch = findDatasetMatch(imgHash);
-
-    // Grayscale luminance and global RGB statistics
-    const gray = new Float32Array(targetW * targetH);
-    let totalR = 0, totalG = 0, totalB = 0;
-    for (let i = 0; i < data.length; i += 4) {
-      const idx = i / 4;
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-      gray[idx] = 0.299 * r + 0.587 * g + 0.114 * b;
-      totalR += r;
-      totalG += g;
-      totalB += b;
-    }
-    const meanR = totalR / (targetW * targetH);
-    const meanG = totalG / (targetW * targetH);
-    const meanB = totalB / (targetW * targetH);
-
-    // 1. Background identification from perimeter margins
-    let cornerSum = 0;
-    let cornerCount = 0;
-    const margin = 16;
-    for (let y = 0; y < targetH; y++) {
-      for (let x = 0; x < targetW; x++) {
-        if (y < margin || y >= targetH - margin || x < margin || x >= targetW - margin) {
-          cornerSum += gray[y * targetW + x];
-          cornerCount++;
-        }
-      }
-    }
-    const bgLum = cornerSum / cornerCount;
-
-    // Object segmentation
-    const isObject = new Uint8Array(targetW * targetH);
-    for (let i = 0; i < gray.length; i++) {
-      if (Math.abs(gray[i] - bgLum) > 20) {
-        isObject[i] = 1;
-      }
+    for (let i = 0; i < w * h; i++) {
+      const idx = i * 4;
+      gray[i] = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
     }
 
-    // 2. Boundary erosion: strictly erode silhouette edge by 10 pixels
-    // Normal outer boundaries are structural, NOT defects!
-    const eroded = new Uint8Array(targetW * targetH);
-    const erosionDist = 10;
-    let erodedCount = 0;
+    const gradMap = new Float32Array(w * h);
+    let maxGrad = 1.0;
 
-    for (let y = erosionDist; y < targetH - erosionDist; y++) {
-      for (let x = erosionDist; x < targetW - erosionDist; x++) {
-        const idx = y * targetW + x;
-        if (isObject[idx]) {
-          let keep = 1;
-          for (let dy = -erosionDist; dy <= erosionDist; dy += 5) {
-            for (let dx = -erosionDist; dx <= erosionDist; dx += 5) {
-              if (!isObject[(y + dy) * targetW + (x + dx)]) {
-                keep = 0;
-                break;
-              }
-            }
-            if (!keep) break;
-          }
-          eroded[idx] = keep;
-          if (keep) erodedCount++;
-        }
-      }
-    }
-
-    const useFullFrame = erodedCount < 2500; // Textures like carpet fill the full frame
-    const roiMask = useFullFrame ? isObject : eroded;
-
-    // 3. 3x3 Sobel gradient map on interior ROI
-    const gradMap = new Float32Array(targetW * targetH);
-    for (let y = 1; y < targetH - 1; y++) {
-      for (let x = 1; x < targetW - 1; x++) {
-        const idx = y * targetW + x;
-        if (!useFullFrame && !roiMask[idx]) continue;
-
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        const idx = y * w + x;
         const gx =
-          -gray[idx - targetW - 1] + gray[idx - targetW + 1] +
+          -gray[idx - w - 1] + gray[idx - w + 1] +
           -2 * gray[idx - 1] + 2 * gray[idx + 1] +
-          -gray[idx + targetW - 1] + gray[idx + targetW + 1];
+          -gray[idx + w - 1] + gray[idx + w + 1];
 
         const gy =
-          -gray[idx - targetW - 1] - 2 * gray[idx - targetW] - gray[idx - targetW + 1] +
-           gray[idx + targetW - 1] + 2 * gray[idx + targetW] + gray[idx + targetW + 1];
+          -gray[idx - w - 1] - 2 * gray[idx - w] - gray[idx - w + 1] +
+           gray[idx + w - 1] + 2 * gray[idx + w] + gray[idx + w + 1];
 
-        gradMap[idx] = Math.sqrt(gx * gx + gy * gy);
+        const mag = Math.sqrt(gx * gx + gy * gy);
+        gradMap[idx] = mag;
+        if (mag > maxGrad) maxGrad = mag;
       }
     }
 
-    // 4. Local Patch Energy & Anomaly Contrast Calculation
-    const patchSize = 16;
-    let maxPatchEnergy = 0;
-    let maxPatchX = Math.round(targetW / 2);
-    let maxPatchY = Math.round(targetH / 2);
-    let maxColorDev = 0;
-    const patchEnergies = [];
-
-    for (let py = 16; py < targetH - 24; py += 8) {
-      for (let px = 16; px < targetW - 24; px += 8) {
-        let pGradSum = 0;
-        let pCount = 0;
-        let pRSum = 0, pGSum = 0, pBSum = 0;
-        for (let dy = 0; dy < patchSize; dy++) {
-          for (let dx = 0; dx < patchSize; dx++) {
-            const pIdx = (py + dy) * targetW + (px + dx);
-            if (useFullFrame || roiMask[pIdx]) {
-              pGradSum += gradMap[pIdx];
-              const pDataIdx = pIdx * 4;
-              pRSum += data[pDataIdx];
-              pGSum += data[pDataIdx + 1];
-              pBSum += data[pDataIdx + 2];
-              pCount++;
-            }
-          }
-        }
-        if (pCount > (patchSize * patchSize * 0.35)) {
-          const energy = pGradSum / pCount;
-          patchEnergies.push(energy);
-
-          // Local color variance check (stains, oxidation, discoloration)
-          const pAvgR = pRSum / pCount;
-          const pAvgG = pGSum / pCount;
-          const pAvgB = pBSum / pCount;
-          const colorDist = Math.sqrt(
-            Math.pow(pAvgR - meanR, 2) +
-            Math.pow(pAvgG - meanG, 2) +
-            Math.pow(pAvgB - meanB, 2)
-          );
-          if (colorDist > maxColorDev) maxColorDev = colorDist;
-
-          if (energy > maxPatchEnergy) {
-            maxPatchEnergy = energy;
-            maxPatchX = px + Math.round(patchSize / 2);
-            maxPatchY = py + Math.round(patchSize / 2);
-          }
-        }
-      }
-    }
-
-    // Statistical Percentile Distribution
-    patchEnergies.sort((a, b) => a - b);
-    const n = patchEnergies.length;
-    const p95 = n > 0 ? patchEnergies[Math.floor(n * 0.95)] : 20;
-
-    // Isolated anomaly spike vs nominal surface gradient
-    const isolatedSpike = n > 4 ? maxPatchEnergy / (p95 + 2.0) : 1.0;
-
-    // Bilateral Structural Symmetry (asymmetry is elevated in bent leads, chips, and cracks)
-    let symDiffSum = 0;
-    let symCount = 0;
-    for (let y = 16; y < targetH - 16; y += 4) {
-      for (let x = 16; x < targetW / 2; x += 4) {
-        const idxL = y * targetW + x;
-        const idxR = y * targetW + (targetW - 1 - x);
-        if (roiMask[idxL] && roiMask[idxR]) {
-          symDiffSum += Math.abs(gray[idxL] - gray[idxR]);
-          symCount++;
-        }
-      }
-    }
-    const meanAsymmetry = symCount > 0 ? symDiffSum / symCount : 0;
-
-    // 5. Semantic Ground Truth & Domain Intelligence
-    const lowerName = (state.currentImageName || '').toLowerCase();
-
-    // Defect keyword detection
-    const hasDefectKeyword = /bent|scratch|color|cut|hole|thread|defect|damage|crack|broken|misplaced|fail|bad|lead|dent|stain|chip|tear|anomaly|deform|slit|reject|burn|rust|void|short|flaw|dirty|spot|discolor|fracture|puncture|missing|foreign|burr/i.test(lowerName);
-
-    // Good / Nominal keyword recognition (strictly semantic keywords, NO bare number regex)
-    const isExplicitGood = !hasDefectKeyword && /good|nominal|clean|pass|flawless|\bok\b|pristine|perfect|healthy|defect_free|nodefect|standard/i.test(lowerName);
-
-    // Scale coordinates to 400x400 display viewport
-    const scaleFactor = 400 / targetW;
-    const scaledX = Math.round(maxPatchX * scaleFactor);
-    const scaledY = Math.round(maxPatchY * scaleFactor);
-    const radius = Math.round(Math.max(45, Math.min(85, isolatedSpike * 30)));
-
-    // 6. Classification Output Ladder
-    let isDefect = false;
-    let defectProb = 0;
-    let anomalyName = 'Nominal Spec (Compliant Surface)';
-    let actuatorAction = 'APPROVED FOR PACKAGING';
-    let targetCoords = null;
-
-    // Priority 1: Manual operator calibration override
-    if (state.manualOverride === 'good') {
-      isDefect = false;
-      defectProb = 0.5;
-      anomalyName = 'Nominal Surface (Calibrated Pass)';
-      actuatorAction = 'APPROVED FOR PACKAGING';
-    } else if (state.manualOverride === 'defect') {
-      isDefect = true;
-      defectProb = 98.6;
-      anomalyName = 'Confirmed Defect (Calibrated Reject)';
-      actuatorAction = 'DIVERT TO REJECT BIN 2';
-    } else if (presetSample) {
-      // Priority 2: Benchmark sample preset
-      isDefect = presetSample.type === 'defect';
-      defectProb = presetSample.defaultConf;
-      anomalyName = presetSample.anomaly;
-      actuatorAction = presetSample.actuator;
-      if (presetSample.target) targetCoords = presetSample.target;
-    } else if (datasetMatch) {
-      // Priority 3: Perceptual Fingerprint Match from MVTec Industrial QC Benchmark (Ground Truth)
-      const m = datasetMatch.match;
-      isDefect = (m.d === 1);
-      defectProb = isDefect ? (m.c || 97.8) : (100 - (m.c || 99.2));
-      anomalyName = m.t || (isDefect ? 'Confirmed Surface Defect' : 'Nominal Compliant Surface');
-      actuatorAction = isDefect ? 'DIVERT TO REJECT BIN 2' : 'APPROVED FOR PACKAGING';
-      if (isDefect && m.r) {
-        targetCoords = m.r;
-      }
-    } else if (hasDefectKeyword) {
-      // Priority 4: Explicit Defect keyword in filename (e.g. bent_lead.png, scratch_nut.jpg)
-      isDefect = true;
-      defectProb = Math.min(99.4, Math.max(94.2, 91.0 + isolatedSpike * 3.5));
-      anomalyName = identifyKeywordDefect(lowerName);
-      actuatorAction = 'DIVERT TO REJECT BIN 2';
-    } else if (isExplicitGood) {
-      // Priority 5: Explicit Good semantic keyword in filename
-      isDefect = false;
-      defectProb = Math.min(2.4, Math.max(0.4, (isolatedSpike - 1.0) * 2.0));
-      anomalyName = 'Nominal Specification (Meets QC Standard)';
-      actuatorAction = 'APPROVED FOR PACKAGING';
-    } else {
-      // Priority 6: Unlabeled generic custom upload (real-time computer vision feature extraction)
-      // Logistic sigmoid activation combining isolated gradient spike, structural asymmetry, and color variance
-      const isPrecision = state.calibrationMode === 'precision';
-      const spikeWeight = isPrecision ? 18.0 : 14.0;
-      const asymWeight = isPrecision ? 0.45 : 0.35;
-      const colorWeight = isPrecision ? 0.30 : 0.20;
-      const bias = isPrecision ? -28.0 : -22.0;
-
-      const rawLogit = (isolatedSpike - 1.0) * spikeWeight + meanAsymmetry * asymWeight + maxColorDev * colorWeight + bias;
-      const sigmoidProb = 100 / (1 + Math.exp(-rawLogit * 0.15));
-      defectProb = Math.min(98.8, Math.max(1.2, sigmoidProb));
-
-      isDefect = defectProb >= state.sensitivityThreshold;
-      if (isDefect) {
-        anomalyName = maxColorDev > 35 ? 'Localized Chemical / Oxidation Stain'
-                    : meanAsymmetry > 25 ? 'Morphological Asymmetry / Broken Contour'
-                    : 'Localized Structural Anomaly Detected';
-        actuatorAction = 'DIVERT TO REJECT BIN 2';
-      } else {
-        anomalyName = 'Nominal Surface (Uniform Texture)';
-        actuatorAction = 'APPROVED FOR PACKAGING';
-      }
-    }
-
-    const finalX = targetCoords ? targetCoords.x : (presetSample && presetSample.target ? presetSample.target.x : scaledX);
-    const finalY = targetCoords ? targetCoords.y : (presetSample && presetSample.target ? presetSample.target.y : scaledY);
-    const finalR = targetCoords ? targetCoords.r : (presetSample && presetSample.target ? presetSample.target.r : radius);
-
-    return {
-      isDefect: isDefect,
-      defectProb: defectProb,
-      goodProb: 100 - defectProb,
-      anomalyName: anomalyName,
-      actuatorAction: actuatorAction,
-      x: finalX,
-      y: finalY,
-      radius: finalR,
-      gradMap: gradMap,
-      targetW: targetW,
-      targetH: targetH,
-      estimatedArea: isDefect ? Math.round(Math.PI * Math.pow(finalR * 0.45, 2)) : 0
-    };
-  }
-
-  function identifyKeywordDefect(name) {
-    if (name.includes('bent') && name.includes('lead')) return 'Bent Pin 3 / Coplanarity Deviation';
-    if (name.includes('bent')) return 'Flange Deformation / Bent Contour';
-    if (name.includes('scratch')) return 'Surface Tooling Scratch';
-    if (name.includes('color') || name.includes('stain') || name.includes('discolor')) return 'Chemical Oxidation Stain / Discoloration';
-    if (name.includes('cut') && name.includes('lead')) return 'Missing Terminal Pin Lead';
-    if (name.includes('cut') || name.includes('slit')) return 'Knife Slit in Weave Pile';
-    if (name.includes('hole') || name.includes('puncture')) return 'Fabric Weave Puncture Hole';
-    if (name.includes('thread')) return 'Loose Warp Thread Defect';
-    if (name.includes('damage') || name.includes('crack') || name.includes('fracture')) return 'Epoxy Case Fracture / Crack';
-    if (name.includes('dent') || name.includes('chip')) return 'Mechanical Tooling Dent / Edge Chip';
-    return 'Surface Texture Irregularity';
+    return { w, h, gradMap, maxGrad };
   }
 
   // =========================================================================
-  // 4. RENDERING VIEW MODES (RAW, CAM, EDGE, MASK)
+  // 4. VIEWPORT VISUALIZERS (100% Real Image Processing)
   // =========================================================================
 
   function setupViewModeTabs() {
@@ -759,39 +550,18 @@
 
   function renderCurrentViewMode() {
     const canvas = els.processingCanvas;
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, 400, 400);
 
-    const res = state.cvResults;
+    const res = state.inferenceResults;
     if (!res) return;
 
-    // Dynamically evaluate isDefect based on current sensitivity threshold
-    const threshold = state.sensitivityThreshold || 50;
-    const isDefect = res.defectProb >= threshold;
-    res.isDefect = isDefect;
-
-    // Target reticle
-    if (isDefect && state.viewMode !== 'raw') {
-      els.targetReticle.style.display = 'block';
-      const size = res.radius * 2;
-      els.targetReticle.style.width = `${size}px`;
-      els.targetReticle.style.height = `${size}px`;
-      els.targetReticle.style.left = `${res.x - res.radius}px`;
-      els.targetReticle.style.top = `${res.y - res.radius}px`;
-      els.reticleTag.textContent = res.anomalyName.split('/')[0].trim().toUpperCase();
-    } else {
-      els.targetReticle.style.display = 'none';
-    }
-
     if (state.viewMode === 'raw') {
-      canvas.style.opacity = '0';
+      // Direct high-resolution image — processing canvas remains transparent
       return;
-    }
-
-    canvas.style.opacity = '1';
-
-    if (state.viewMode === 'cam') {
-      renderCamHeatmap(ctx, res);
+    } else if (state.viewMode === 'cam') {
+      renderSpatialEnergyMap(ctx, res);
     } else if (state.viewMode === 'edge') {
       renderEdgeMetrology(ctx, res);
     } else if (state.viewMode === 'mask') {
@@ -799,54 +569,30 @@
     }
   }
 
-  function renderCamHeatmap(ctx, res) {
-    if (!res.isDefect) {
-      // Nominal part — pleasant uniform emerald verification sheen
-      const rad = ctx.createRadialGradient(200, 200, 20, 200, 200, 190);
-      rad.addColorStop(0, 'rgba(16, 185, 129, 0.28)');
-      rad.addColorStop(0.7, 'rgba(16, 185, 129, 0.12)');
-      rad.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-      ctx.fillStyle = rad;
-      ctx.fillRect(0, 0, 400, 400);
+  /**
+   * Spatial Feature Activation Density Map
+   * Computes smoothed 2D gradient energy density mapped to thermal colormap
+   */
+  function renderSpatialEnergyMap(ctx, res) {
+    if (!res.edgeData) return;
+    const { w, h, gradMap, maxGrad } = res.edgeData;
 
-      // Centered badge text on canvas
-      ctx.fillStyle = 'rgba(110, 231, 183, 0.9)';
-      ctx.font = 'bold 12px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('NOMINAL WORKPIECE — ZERO DEFECT CLUSTERS', 200, 385);
-      return;
+    // Smooth gradient energy density with 5x5 blur into low-res grid
+    const density = new Float32Array(w * h);
+    for (let y = 2; y < h - 2; y += 2) {
+      for (let x = 2; x < w - 2; x += 2) {
+        let sum = 0;
+        for (let dy = -2; dy <= 2; dy++) {
+          for (let dx = -2; dx <= 2; dx++) {
+            sum += gradMap[(y + dy) * w + (x + dx)];
+          }
+        }
+        density[y * w + x] = sum / 25.0;
+      }
     }
 
-    // Thermal Grad-CAM Glow centered at anomaly
-    const rad = ctx.createRadialGradient(res.x, res.y, 4, res.x, res.y, res.radius);
-    rad.addColorStop(0.0, 'rgba(244, 63, 94, 0.95)');   // Hot red core
-    rad.addColorStop(0.3, 'rgba(249, 115, 22, 0.85)');  // Warm orange
-    rad.addColorStop(0.55, 'rgba(234, 179, 8, 0.65)');  // Mid yellow
-    rad.addColorStop(0.8, 'rgba(6, 182, 212, 0.35)');   // Cool cyan border
-    rad.addColorStop(1.0, 'rgba(6, 182, 212, 0.0)');    // Fade
-
-    ctx.fillStyle = rad;
-    ctx.beginPath();
-    ctx.arc(res.x, res.y, res.radius, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Hot center highlight
-    const core = ctx.createRadialGradient(res.x, res.y, 0, res.x, res.y, res.radius * 0.3);
-    core.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-    core.addColorStop(1, 'rgba(244, 63, 94, 0.0)');
-    ctx.fillStyle = core;
-    ctx.beginPath();
-    ctx.arc(res.x, res.y, res.radius * 0.3, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  function renderEdgeMetrology(ctx, res) {
-    const w = res.targetW;
-    const h = res.targetH;
-    const grad = res.gradMap;
     const imgData = ctx.createImageData(400, 400);
     const d = imgData.data;
-
     const scaleX = w / 400;
     const scaleY = h / 400;
 
@@ -854,14 +600,28 @@
       for (let x = 0; x < 400; x++) {
         const srcX = Math.floor(x * scaleX);
         const srcY = Math.floor(y * scaleY);
-        const val = grad[srcY * w + srcX] || 0;
+        const val = density[srcY * w + srcX] || 0;
+        const norm = Math.min(1.0, val / (maxGrad * 0.45));
         const outIdx = (y * 400 + x) * 4;
 
-        if (val > 65) {
-          d[outIdx] = 6;
-          d[outIdx + 1] = 182;
-          d[outIdx + 2] = 212;
-          d[outIdx + 3] = Math.min(240, val * 1.5);
+        if (norm > 0.08) {
+          // Thermal gradient: Blue (0.1) -> Cyan (0.3) -> Yellow (0.6) -> Red (0.9)
+          if (norm < 0.35) {
+            d[outIdx] = 6;
+            d[outIdx + 1] = Math.floor(182 * (norm / 0.35));
+            d[outIdx + 2] = 212;
+            d[outIdx + 3] = Math.floor(norm * 180);
+          } else if (norm < 0.65) {
+            d[outIdx] = Math.floor(234 * ((norm - 0.35) / 0.3));
+            d[outIdx + 1] = 179;
+            d[outIdx + 2] = 8;
+            d[outIdx + 3] = Math.floor(norm * 220);
+          } else {
+            d[outIdx] = 244;
+            d[outIdx + 1] = Math.floor(63 * (1.0 - (norm - 0.65) / 0.35));
+            d[outIdx + 2] = 94;
+            d[outIdx + 3] = Math.floor(norm * 240);
+          }
         } else {
           d[outIdx + 3] = 0;
         }
@@ -870,22 +630,15 @@
     ctx.putImageData(imgData, 0, 0);
   }
 
-  function renderThresholdMask(ctx, res) {
-    if (!res.isDefect) {
-      // Clear green verification border
-      ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(10, 10, 380, 380);
-      return;
-    }
+  /**
+   * Sobel Gradient Edge Metrology (Cracks, Burrs, Boundaries)
+   */
+  function renderEdgeMetrology(ctx, res) {
+    if (!res.edgeData) return;
+    const { w, h, gradMap, maxGrad } = res.edgeData;
 
-    const w = res.targetW;
-    const h = res.targetH;
-    const grad = res.gradMap;
     const imgData = ctx.createImageData(400, 400);
     const d = imgData.data;
-
-    const thresh = state.sensitivityThreshold * 1.8;
     const scaleX = w / 400;
     const scaleY = h / 400;
 
@@ -893,14 +646,47 @@
       for (let x = 0; x < 400; x++) {
         const srcX = Math.floor(x * scaleX);
         const srcY = Math.floor(y * scaleY);
-        const val = grad[srcY * w + srcX] || 0;
+        const val = gradMap[srcY * w + srcX] || 0;
         const outIdx = (y * 400 + x) * 4;
 
-        if (val > thresh) {
+        if (val > 40) {
+          d[outIdx] = 34;
+          d[outIdx + 1] = 211;
+          d[outIdx + 2] = 238; // Neon Cyan
+          d[outIdx + 3] = Math.min(235, Math.floor((val / maxGrad) * 320));
+        } else {
+          d[outIdx + 3] = 0;
+        }
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+  }
+
+  /**
+   * Binary Threshold Segmentation Mask
+   */
+  function renderThresholdMask(ctx, res) {
+    if (!res.edgeData) return;
+    const { w, h, gradMap } = res.edgeData;
+
+    const imgData = ctx.createImageData(400, 400);
+    const d = imgData.data;
+    const scaleX = w / 400;
+    const scaleY = h / 400;
+    const cutoff = state.sensitivityThreshold * 1.6;
+
+    for (let y = 0; y < 400; y++) {
+      for (let x = 0; x < 400; x++) {
+        const srcX = Math.floor(x * scaleX);
+        const srcY = Math.floor(y * scaleY);
+        const val = gradMap[srcY * w + srcX] || 0;
+        const outIdx = (y * 400 + x) * 4;
+
+        if (val > cutoff) {
           d[outIdx] = 244;
           d[outIdx + 1] = 63;
-          d[outIdx + 2] = 94;
-          d[outIdx + 3] = 210;
+          d[outIdx + 2] = 94; // Rose Reject
+          d[outIdx + 3] = 215;
         } else {
           d[outIdx + 3] = 0;
         }
@@ -910,58 +696,68 @@
   }
 
   // =========================================================================
-  // 5. METROLOGY HUD & CALIBRATION CONTROLS
+  // 5. METROLOGY HUD, TELEMETRY & DECISION BOUNDARY
   // =========================================================================
 
-  function updateMetrologyHUD(res) {
+  function updateMetrologyHUD() {
+    const res = state.inferenceResults;
     if (!res) return;
 
     const threshold = state.sensitivityThreshold;
-    const isDefect = res.defectProb >= threshold;
-    const top1Conf = isDefect ? res.defectProb : res.goodProb;
+    const isDefect = res.pDefect >= threshold;
+    const pDefect = res.pDefect;
+    const pGood = res.pGood;
+    const cfg = MODEL_CONFIGS[state.activeModel] || MODEL_CONFIGS.factory_a;
 
-    // Primary Top-1 Classification Confidence Card
-    if (els.top1PredictionCard) {
-      els.top1PredictionCard.className = isDefect ? 'top1-prediction-card defect' : 'top1-prediction-card good';
-    }
-    if (els.hudTop1Class) {
-      els.hudTop1Class.textContent = isDefect ? 'DEFECT DETECTED' : 'NOMINAL / GOOD PRODUCT';
-      els.hudTop1Class.className = isDefect ? 'top1-class-name text-rose' : 'top1-class-name text-emerald';
-    }
-    if (els.hudTop1Conf) {
-      els.hudTop1Conf.textContent = `${top1Conf.toFixed(1)}%`;
-      els.hudTop1Conf.className = isDefect ? 'top1-score text-rose' : 'top1-score text-emerald';
-    }
-    if (els.hudTop1Certainty) {
-      if (isDefect) {
-        els.hudTop1Certainty.textContent = top1Conf >= 90 ? 'High Defect Certainty' : 'Threshold Breach Detected';
-      } else {
-        els.hudTop1Certainty.textContent = top1Conf >= 95 ? 'High Nominal Certainty' : 'Within Tolerance Limit';
+    // 1. Primary Classification Confidence Box
+    if (res.isOOD) {
+      if (els.top1PredictionCard) els.top1PredictionCard.className = 'top1-prediction-card';
+      if (els.hudTop1Class) {
+        els.hudTop1Class.textContent = 'AMBIGUOUS / OOD';
+        els.hudTop1Class.className = 'top1-class-name text-purple';
       }
-    }
+      if (els.hudTop1Conf) {
+        els.hudTop1Conf.textContent = `${Math.max(pDefect, pGood).toFixed(1)}%`;
+        els.hudTop1Conf.className = 'top1-score text-purple';
+      }
+      if (els.hudTop1Certainty) els.hudTop1Certainty.textContent = 'Certainty < 58% (OOD Warning)';
 
-    // Probability breakdown meters
-    els.hudDefectProb.textContent = `${res.defectProb.toFixed(1)}%`;
-    els.hudDefectBar.style.width = `${res.defectProb}%`;
-    els.hudGoodProb.textContent = `${res.goodProb.toFixed(1)}%`;
-    els.hudGoodBar.style.width = `${res.goodProb}%`;
+      els.verdictCard.className = 'verdict-card glass-card';
+      els.verdictStatusTag.textContent = 'OUT-OF-DISTRIBUTION (OOD) / LOW CONFIDENCE';
+      els.verdictTitle.textContent = 'UNRECOGNIZED WORKPIECE';
+      els.verdictDescription.textContent = 'Neural network certainty is below the 58% confidence threshold. The workpiece does not closely match the active model domain. Verify selected factory model or lighting.';
+      els.tiActuator.textContent = 'HOLD FOR MANUAL REVIEW';
+      els.tiActuator.className = 'ti-value text-purple';
 
-    // Latency
-    els.phInferenceTime.textContent = res.latency || '11.8 ms';
+      els.verdictSvg.innerHTML = `
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      `;
 
-    // Telemetry items
-    els.tiDefectType.textContent = isDefect ? res.anomalyName : 'Nominal Spec';
-    els.tiDefectSub.textContent = isDefect ? 'Surface Irregularity' : 'Compliant Standard';
-    els.tiDefectArea.textContent = isDefect ? `${res.estimatedArea} px²` : '0 px² (Clean)';
-    els.tiDefectCoverage.textContent = isDefect ? `${((res.estimatedArea / 160000) * 100).toFixed(2)}% of Surface` : '0.00% (Nominal)';
-    els.tiDefectCoords.textContent = isDefect ? `X: ${res.x}, Y: ${res.y}` : 'N/A';
-    els.tiActuator.textContent = isDefect ? res.actuatorAction : 'APPROVED FOR PACKAGING';
+      if (els.reticleTag) {
+        els.reticleTag.textContent = 'OOD / LOW CERTAINTY';
+        els.reticleTag.style.background = 'rgba(139, 92, 246, 0.8)';
+      }
+    } else if (isDefect) {
+      if (els.top1PredictionCard) els.top1PredictionCard.className = 'top1-prediction-card defect';
+      if (els.hudTop1Class) {
+        els.hudTop1Class.textContent = 'NON-CONFORMING DEFECT';
+        els.hudTop1Class.className = 'top1-class-name text-rose';
+      }
+      if (els.hudTop1Conf) {
+        els.hudTop1Conf.textContent = `${pDefect.toFixed(1)}%`;
+        els.hudTop1Conf.className = 'top1-score text-rose';
+      }
+      if (els.hudTop1Certainty) {
+        els.hudTop1Certainty.textContent = pDefect >= 75 ? 'High Defect Certainty' : 'Threshold Breach Detected';
+      }
 
-    if (isDefect) {
       els.verdictCard.className = 'verdict-card glass-card defect';
-      els.verdictStatusTag.textContent = 'QC DEFECT DETECTED';
+      els.verdictStatusTag.textContent = 'QC DEFECT CONFIRMED';
       els.verdictTitle.textContent = 'NON-CONFORMING PART';
-      els.verdictDescription.textContent = `Anomaly confidence (${res.defectProb.toFixed(1)}%) breaches the ${threshold}% tolerance threshold. Part rejected for packaging.`;
+      els.verdictDescription.textContent = `Defect probability (${pDefect.toFixed(1)}%) breaches the calibrated ${threshold}% threshold. Part flagged for rejection.`;
+      els.tiActuator.textContent = 'DIVERT TO REJECT BIN';
       els.tiActuator.className = 'ti-value text-rose';
 
       els.verdictSvg.innerHTML = `
@@ -969,159 +765,213 @@
         <line x1="12" y1="8" x2="12" y2="12" />
         <line x1="12" y1="16" x2="12.01" y2="16" />
       `;
+
+      if (els.reticleTag) {
+        els.reticleTag.textContent = 'DEFECT FLAGGED';
+        els.reticleTag.style.background = 'rgba(244, 63, 94, 0.85)';
+      }
     } else {
+      if (els.top1PredictionCard) els.top1PredictionCard.className = 'top1-prediction-card good';
+      if (els.hudTop1Class) {
+        els.hudTop1Class.textContent = 'NOMINAL / SPEC PASS';
+        els.hudTop1Class.className = 'top1-class-name text-emerald';
+      }
+      if (els.hudTop1Conf) {
+        els.hudTop1Conf.textContent = `${pGood.toFixed(1)}%`;
+        els.hudTop1Conf.className = 'top1-score text-emerald';
+      }
+      if (els.hudTop1Certainty) {
+        els.hudTop1Certainty.textContent = pGood >= 70 ? 'High Nominal Certainty' : 'Within Calibrated Tolerance';
+      }
+
       els.verdictCard.className = 'verdict-card glass-card good';
       els.verdictStatusTag.textContent = 'QC VERIFIED NOMINAL';
       els.verdictTitle.textContent = 'QUALITY PASSED';
-      els.verdictDescription.textContent = `Workpiece complies with manufacturing specifications (${res.goodProb.toFixed(1)}% pass confidence). Ready for dispatch.`;
+      els.verdictDescription.textContent = `Workpiece complies with manufacturing specifications (${pGood.toFixed(1)}% pass confidence). Ready for dispatch.`;
+      els.tiActuator.textContent = 'PASS TO PACKAGING LINE';
       els.tiActuator.className = 'ti-value text-emerald';
 
       els.verdictSvg.innerHTML = `
         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
         <polyline points="22 4 12 14.01 9 11.01" />
       `;
+
+      if (els.reticleTag) {
+        els.reticleTag.textContent = 'NOMINAL PASS';
+        els.reticleTag.style.background = 'rgba(16, 185, 129, 0.85)';
+      }
     }
+
+    // Probability distribution bars
+    if (els.hudDefectProb) els.hudDefectProb.textContent = `${pDefect.toFixed(1)}%`;
+    if (els.hudDefectBar) els.hudDefectBar.style.width = `${Math.min(100, Math.max(0, pDefect))}%`;
+    if (els.hudGoodProb) els.hudGoodProb.textContent = `${pGood.toFixed(1)}%`;
+    if (els.hudGoodBar) els.hudGoodBar.style.width = `${Math.min(100, Math.max(0, pGood))}%`;
+
+    // Latency
+    if (els.phInferenceTime) els.phInferenceTime.textContent = `${res.latencyMs.toFixed(1)} ms`;
+
+    // Telemetry items
+    if (els.tiDefectType) els.tiDefectType.textContent = cfg.name;
+    if (els.tiDefectSub) els.tiDefectSub.textContent = cfg.domain;
+
+    const margin = (pDefect - threshold);
+    const sign = margin >= 0 ? '+' : '';
+    if (els.tiDefectArea) els.tiDefectArea.textContent = `${sign}${margin.toFixed(1)}%`;
+    if (els.tiDefectCoverage) els.tiDefectCoverage.textContent = `Margin to ${threshold}% Cutoff`;
+
+    if (els.tiDefectCoords) els.tiDefectCoords.textContent = `P(Defect) ≥ ${threshold}%`;
   }
 
   function setupSensitivityControl() {
+    if (!els.thresholdRange) return;
     els.thresholdRange.addEventListener('input', (e) => {
-      const val = parseInt(e.target.value, 10);
-      state.sensitivityThreshold = val;
-      els.thresholdDisplay.textContent = `${val}%`;
-
-      if (state.cvResults) {
-        updateMetrologyHUD(state.cvResults);
-        renderCurrentViewMode();
-      }
+      setThreshold(parseInt(e.target.value, 10));
     });
   }
 
-  function setupCalibrationControls() {
-    // Mode toggle (Precision vs Balanced)
-    els.btnModePrecision.addEventListener('click', () => {
-      state.calibrationMode = 'precision';
-      els.btnModePrecision.classList.add('active');
-      els.btnModeBalanced.classList.remove('active');
-      reAnalyzeCurrent();
-    });
-
-    els.btnModeBalanced.addEventListener('click', () => {
-      state.calibrationMode = 'balanced';
-      els.btnModeBalanced.classList.add('active');
-      els.btnModePrecision.classList.remove('active');
-      reAnalyzeCurrent();
-    });
-
-    // Manual Override buttons
-    els.btnForcePass.addEventListener('click', () => {
-      state.manualOverride = 'good';
-      if (state.cvResults) {
-        state.cvResults.isDefect = false;
-        state.cvResults.defectProb = 0.5;
-        state.cvResults.goodProb = 99.5;
-        state.cvResults.anomalyName = 'Nominal Surface (Calibrated Pass)';
-        state.cvResults.actuatorAction = 'APPROVED FOR PACKAGING';
-        updateMetrologyHUD(state.cvResults);
-        renderCurrentViewMode();
-      }
-    });
-
-    els.btnForceDefect.addEventListener('click', () => {
-      state.manualOverride = 'defect';
-      if (state.cvResults) {
-        state.cvResults.isDefect = true;
-        state.cvResults.defectProb = 98.6;
-        state.cvResults.goodProb = 1.4;
-        state.cvResults.anomalyName = 'Confirmed Defect (Calibrated Reject)';
-        state.cvResults.actuatorAction = 'DIVERT TO REJECT BIN 2';
-        updateMetrologyHUD(state.cvResults);
-        renderCurrentViewMode();
-      }
-    });
+  function setThreshold(val) {
+    state.sensitivityThreshold = val;
+    if (els.thresholdDisplay) els.thresholdDisplay.textContent = `${val}%`;
+    if (els.thresholdRange) els.thresholdRange.value = val;
+    updateMetrologyHUD();
+    renderCurrentViewMode();
   }
 
-  function reAnalyzeCurrent() {
-    state.manualOverride = null;
-    if (els.workpieceImage.complete) {
-      const startTime = performance.now();
-      const cvResults = runComputerVisionAnalysis(els.workpieceImage, null);
-      const latency = (performance.now() - startTime + Math.random() * 3 + 8).toFixed(1);
-      state.cvResults = cvResults;
-      state.cvResults.latency = `${latency} ms`;
-      renderCurrentViewMode();
-      updateMetrologyHUD(state.cvResults);
+  function setupThresholdPresets() {
+    if (els.btnThreshNut) {
+      els.btnThreshNut.addEventListener('click', () => {
+        setThreshold(50);
+        updatePresetActive(els.btnThreshNut);
+      });
+    }
+    if (els.btnThreshTransistor) {
+      els.btnThreshTransistor.addEventListener('click', () => {
+        setThreshold(35);
+        updatePresetActive(els.btnThreshTransistor);
+      });
+    }
+    if (els.btnThreshCarpet) {
+      els.btnThreshCarpet.addEventListener('click', () => {
+        setThreshold(50);
+        updatePresetActive(els.btnThreshCarpet);
+      });
     }
   }
 
+  function updatePresetActive(activeBtn) {
+    [els.btnThreshNut, els.btnThreshTransistor, els.btnThreshCarpet].forEach(b => {
+      if (b) b.classList.remove('active');
+    });
+    if (activeBtn) activeBtn.classList.add('active');
+  }
+
+  // =========================================================================
+  // 6. PIXEL PROBE & SCANNER UI
+  // =========================================================================
+
   function setupPixelProbe() {
     const box = els.stageCanvasBox;
+    if (!box) return;
+
     box.addEventListener('mousemove', (e) => {
       const rect = box.getBoundingClientRect();
       const x = Math.round(e.clientX - rect.left);
       const y = Math.round(e.clientY - rect.top);
 
       if (x < 0 || x > 400 || y < 0 || y > 400) {
-        els.pixelProbeHud.style.display = 'none';
+        if (els.pixelProbeHud) els.pixelProbeHud.style.display = 'none';
         return;
       }
 
-      els.pixelProbeHud.style.display = 'block';
-      els.probeCoords.textContent = `X: ${x} Y: ${y}`;
+      if (els.pixelProbeHud) els.pixelProbeHud.style.display = 'block';
+      if (els.probeCoords) els.probeCoords.textContent = `X: ${x} Y: ${y}`;
 
-      const res = state.cvResults;
-      if (res && res.isDefect) {
-        const dist = Math.sqrt(Math.pow(x - res.x, 2) + Math.pow(y - res.y, 2));
-        const intensity = Math.max(0, Math.round((1 - dist / res.radius) * 100));
-        els.probeIntensity.textContent = `Anomaly: ${intensity}%`;
-      } else {
-        els.probeIntensity.textContent = 'Anomaly: 0% (Nominal)';
+      const res = state.inferenceResults;
+      if (res && res.edgeData) {
+        const { w, h, gradMap, maxGrad } = res.edgeData;
+        const srcX = Math.floor(x * (w / 400));
+        const srcY = Math.floor(y * (h / 400));
+        const gradVal = gradMap[srcY * w + srcX] || 0;
+        const pct = Math.min(100, Math.round((gradVal / maxGrad) * 100));
+        if (els.probeIntensity) els.probeIntensity.textContent = `Edge Energy: ${pct}%`;
       }
     });
 
     box.addEventListener('mouseleave', () => {
-      els.pixelProbeHud.style.display = 'none';
+      if (els.pixelProbeHud) els.pixelProbeHud.style.display = 'none';
     });
   }
 
+  function triggerScannerAnimation() {
+    if (!els.laserScanner) return;
+    els.laserScanner.classList.remove('scanning');
+    void els.laserScanner.offsetWidth; // force reflow
+    els.laserScanner.classList.add('scanning');
+  }
+
+  function showCurtain(msg) {
+    if (els.scanOverlayCurtain) {
+      els.scanOverlayCurtain.style.display = 'flex';
+      if (els.scannerStatusText) els.scannerStatusText.textContent = msg || 'Scanning...';
+    }
+  }
+
+  function hideCurtain() {
+    if (els.scanOverlayCurtain) {
+      els.scanOverlayCurtain.style.display = 'none';
+    }
+  }
+
   function setupExportButton() {
+    if (!els.btnExportReport) return;
     els.btnExportReport.addEventListener('click', () => {
       const reportCanvas = document.createElement('canvas');
-      reportCanvas.width = 600;
-      reportCanvas.height = 700;
+      reportCanvas.width = 640;
+      reportCanvas.height = 760;
       const ctx = reportCanvas.getContext('2d');
 
       ctx.fillStyle = '#070a12';
-      ctx.fillRect(0, 0, 600, 700);
+      ctx.fillRect(0, 0, 640, 760);
 
       ctx.fillStyle = '#8b5cf6';
-      ctx.font = 'bold 20px sans-serif';
-      ctx.fillText('FEDERATED CV QC — INSPECTION REPORT', 30, 45);
+      ctx.font = 'bold 20px Outfit, sans-serif';
+      ctx.fillText('FEDERATED CV QC — IN-BROWSER INSPECTION REPORT', 30, 45);
 
       ctx.fillStyle = '#94a3b8';
-      ctx.font = '13px monospace';
-      ctx.fillText(`File: ${state.currentImageName} | Timestamp: ${new Date().toISOString()}`, 30, 75);
+      ctx.font = '13px sans-serif';
+      ctx.fillText(`Timestamp: ${new Date().toISOString()} • Model: ${MODEL_CONFIGS[state.activeModel].name}`, 30, 70);
 
+      // Draw workpiece image
       try {
-        ctx.drawImage(els.workpieceImage, 100, 100, 400, 400);
-        ctx.drawImage(els.processingCanvas, 100, 100, 400, 400);
+        ctx.drawImage(els.workpieceImage, 30, 95, 260, 260);
       } catch (err) {}
 
-      ctx.strokeStyle = '#22d3ee';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(100, 100, 400, 400);
+      // Draw edge / processing canvas
+      try {
+        ctx.drawImage(els.processingCanvas, 320, 95, 260, 260);
+      } catch (err) {}
 
-      const res = state.cvResults;
-      const verdictText = res && res.isDefect ? 'VERDICT: DEFECT DETECTED (REJECT)' : 'VERDICT: QUALITY PASSED (NOMINAL)';
-      ctx.fillStyle = res && res.isDefect ? '#f43f5e' : '#10b981';
-      ctx.font = 'bold 18px sans-serif';
-      ctx.fillText(verdictText, 30, 550);
+      // Telemetry Summary Box
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+      ctx.fillRect(30, 380, 580, 340);
+
+      const res = state.inferenceResults;
+      const isDefect = res ? res.pDefect >= state.sensitivityThreshold : false;
+
+      ctx.fillStyle = isDefect ? '#f43f5e' : '#10b981';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText(isDefect ? 'VERDICT: NON-CONFORMING DEFECT' : 'VERDICT: QUALITY PASSED', 50, 420);
 
       ctx.fillStyle = '#f8fafc';
       ctx.font = '14px monospace';
-      ctx.fillText(`Defect Probability: ${res ? res.defectProb.toFixed(1) : 0}%`, 30, 585);
-      ctx.fillText(`Anomaly Type: ${res ? res.anomalyName : 'None'}`, 30, 610);
-      ctx.fillText(`Actuator Action: ${res ? res.actuatorAction : 'PASS'}`, 30, 635);
-      ctx.fillText(`Privacy Bound: epsilon = 5.0 (Gaussian noise injected)`, 30, 660);
+      ctx.fillText(`Active Model: ${MODEL_CONFIGS[state.activeModel].name}`, 50, 460);
+      ctx.fillText(`Defect Probability: ${res ? res.pDefect.toFixed(2) : '0'}%`, 50, 490);
+      ctx.fillText(`Nominal Probability: ${res ? res.pGood.toFixed(2) : '0'}%`, 50, 520);
+      ctx.fillText(`Tolerance Threshold: ${state.sensitivityThreshold}%`, 50, 550);
+      ctx.fillText(`Inference Latency: ${res ? res.latencyMs.toFixed(1) : '0'} ms (ONNX Web WASM)`, 50, 580);
+      ctx.fillText(`Privacy Bound: ε = 8.27, δ = 1e-5 (Rényi DP Accountant)`, 50, 610);
+      ctx.fillText(`Client Privacy: 100% In-Browser Execution (0 Tensors Transmitted)`, 50, 640);
 
       const link = document.createElement('a');
       link.download = `qc_report_${Date.now()}.png`;
@@ -1131,205 +981,156 @@
   }
 
   // =========================================================================
-  // 6. DP PRIVACY CHART & ROUND STEPPER
+  // 7. DIFFERENTIAL PRIVACY CHART & ROUND STEPPER
   // =========================================================================
 
   function setupChart() {
-    const canvas = els.dpChartCanvas;
-    if (!canvas) return;
-
-    function resizeCanvas() {
-      const rect = canvas.parentElement.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
-      drawChart();
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    canvas.addEventListener('mousemove', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      const padLeft = 50;
-      const padRight = 30;
-      const plotW = rect.width - padLeft - padRight;
-      const idx = Math.round(((mouseX - padLeft) / plotW) * (TRAINING_ROUNDS_DATA.length - 1));
-
-      if (idx >= 0 && idx < TRAINING_ROUNDS_DATA.length) {
-        const item = TRAINING_ROUNDS_DATA[idx];
-        const tooltip = els.chartTooltip;
-        tooltip.style.display = 'block';
-        tooltip.style.left = `${mouseX}px`;
-        tooltip.style.top = `${mouseY}px`;
-        tooltip.innerHTML = `
-          <strong>Round ${item.round} / 10</strong><br>
-          &epsilon; Spent: <strong>${item.epsilon.toFixed(2)}</strong><br>
-          Clients: 3 active<br>
-          Bound: &delta; = 1e-5
-        `;
-      }
-    });
-
-    canvas.addEventListener('mouseleave', () => {
-      els.chartTooltip.style.display = 'none';
-    });
+    renderDpChart();
+    window.addEventListener('resize', renderDpChart);
   }
 
-  function drawChart() {
+  function renderDpChart() {
     const canvas = els.dpChartCanvas;
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
-    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.width;
+    const h = canvas.height;
 
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(0, 0, w, h);
 
-    const padLeft = 60 * dpr;
-    const padRight = 30 * dpr;
-    const padTop = 30 * dpr;
-    const padBottom = 40 * dpr;
+    const padLeft = 60;
+    const padRight = 30;
+    const padTop = 30;
+    const padBottom = 45;
 
-    const plotW = width - padLeft - padRight;
-    const plotH = height - padTop - padBottom;
-    const maxEpsilon = 6.0;
-    const rounds = TRAINING_ROUNDS_DATA.length;
-
-    const getX = (round) => padLeft + ((round - 1) / (rounds - 1)) * plotW;
-    const getY = (val) => padTop + plotH - (val / maxEpsilon) * plotH;
+    const plotW = w - padLeft - padRight;
+    const plotH = h - padTop - padBottom;
 
     // Grid lines
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
-    ctx.lineWidth = 1 * dpr;
-    ctx.fillStyle = '#64748b';
-    ctx.font = `${11 * dpr}px 'JetBrains Mono', monospace`;
-    ctx.textAlign = 'right';
+    ctx.lineWidth = 1;
+    const maxEps = 10.0;
+    const yTicks = [0, 2.5, 5.0, 7.5, 10.0];
 
-    for (let val = 0; val <= maxEpsilon; val += 1.0) {
-      const y = getY(val);
+    yTicks.forEach(tick => {
+      const y = padTop + plotH * (1 - tick / maxEps);
       ctx.beginPath();
       ctx.moveTo(padLeft, y);
-      ctx.lineTo(width - padRight, y);
+      ctx.lineTo(padLeft + plotW, y);
       ctx.stroke();
-      ctx.fillText(`${val.toFixed(1)}ε`, padLeft - 10 * dpr, y + 4 * dpr);
-    }
 
-    ctx.textAlign = 'center';
-    for (let r = 1; r <= 10; r += 1) {
-      const x = getX(r);
-      ctx.fillText(`R${r}`, x, height - 15 * dpr);
-    }
+      ctx.fillStyle = '#64748b';
+      ctx.font = '11px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(tick.toFixed(1), padLeft - 10, y + 4);
+    });
 
-    // Safety Limit Line (5.0)
-    const limitY = getY(5.0);
-    ctx.strokeStyle = 'rgba(244, 63, 94, 0.6)';
-    ctx.setLineDash([4 * dpr, 4 * dpr]);
-    ctx.lineWidth = 1.5 * dpr;
+    // Privacy limit line (ε = 10.0)
+    ctx.strokeStyle = 'rgba(244, 63, 94, 0.5)';
+    ctx.setLineDash([5, 5]);
     ctx.beginPath();
-    ctx.moveTo(padLeft, limitY);
-    ctx.lineTo(width - padRight, limitY);
+    ctx.moveTo(padLeft, padTop);
+    ctx.lineTo(padLeft + plotW, padTop);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Area Fill
-    const areaGrad = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
-    areaGrad.addColorStop(0, 'rgba(139, 92, 246, 0.35)');
-    areaGrad.addColorStop(1, 'rgba(139, 92, 246, 0.01)');
-    ctx.fillStyle = areaGrad;
+    // Data points from TRAINING_ROUNDS_DATA (5 rounds)
+    const points = TRAINING_ROUNDS_DATA.map(d => {
+      const x = padLeft + ((d.round - 1) / (TRAINING_ROUNDS_DATA.length - 1)) * plotW;
+      const y = padTop + plotH * (1 - d.epsilon / maxEps);
+      return { x, y, round: d.round, eps: d.epsilon };
+    });
+
+    // Gradient fill under curve
+    const grad = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
+    grad.addColorStop(0, 'rgba(139, 92, 246, 0.35)');
+    grad.addColorStop(1, 'rgba(139, 92, 246, 0.0)');
+
+    ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.moveTo(getX(1), getY(0));
-    TRAINING_ROUNDS_DATA.forEach(d => ctx.lineTo(getX(d.round), getY(d.epsilon)));
-    ctx.lineTo(getX(10), getY(0));
+    ctx.moveTo(points[0].x, padTop + plotH);
+    points.forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.lineTo(points[points.length - 1].x, padTop + plotH);
     ctx.closePath();
     ctx.fill();
 
-    // Curve Line
+    // Line curve
     ctx.strokeStyle = '#8b5cf6';
-    ctx.lineWidth = 3 * dpr;
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
-    TRAINING_ROUNDS_DATA.forEach((d, i) => {
-      const x = getX(d.round);
-      const y = getY(d.epsilon);
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
+    points.forEach((p, idx) => {
+      if (idx === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
     });
     ctx.stroke();
 
-    // Points
-    TRAINING_ROUNDS_DATA.forEach(d => {
-      const x = getX(d.round);
-      const y = getY(d.epsilon);
-      const isSelected = d.round === state.selectedRound;
-
+    // Data dots
+    points.forEach(p => {
+      ctx.fillStyle = '#fff';
+      ctx.strokeStyle = '#8b5cf6';
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(x, y, (isSelected ? 6 : 4) * dpr, 0, Math.PI * 2);
-      ctx.fillStyle = isSelected ? '#a78bfa' : '#8b5cf6';
+      ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
       ctx.fill();
+      ctx.stroke();
 
-      if (isSelected) {
-        ctx.beginPath();
-        ctx.arc(x, y, 9 * dpr, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(167, 139, 250, 0.7)';
-        ctx.lineWidth = 2 * dpr;
-        ctx.stroke();
-      }
+      // Round label on X axis
+      ctx.fillStyle = '#64748b';
+      ctx.font = '11px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`R${p.round}`, p.x, padTop + plotH + 20);
     });
   }
 
   function setupRoundStepper() {
+    if (!els.roundSlider) return;
     els.roundSlider.addEventListener('input', (e) => {
-      const round = parseInt(e.target.value, 10);
-      state.selectedRound = round;
-      const data = TRAINING_ROUNDS_DATA[round - 1];
-      if (!data) return;
-
-      els.scrubberRoundNum.textContent = `Round ${round}`;
-      els.logEpsilon.textContent = `${data.epsilon.toFixed(2)}`;
-      els.roundAnnotationText.textContent = data.annotation;
-      drawChart();
+      const r = parseInt(e.target.value, 10);
+      state.selectedRound = r;
+      updateRoundDetails(r);
     });
+    updateRoundDetails(state.selectedRound);
+  }
+
+  function updateRoundDetails(roundNum) {
+    const data = TRAINING_ROUNDS_DATA.find(d => d.round === roundNum) || TRAINING_ROUNDS_DATA[TRAINING_ROUNDS_DATA.length - 1];
+    if (els.scrubberRoundNum) els.scrubberRoundNum.textContent = `Round ${data.round}`;
+    if (els.logEpsilon) els.logEpsilon.textContent = `${data.epsilon.toFixed(3)}`;
+    if (els.roundAnnotationText) els.roundAnnotationText.textContent = data.annotation;
   }
 
   // =========================================================================
-  // 7. FEDERATED AGGREGATION SIMULATION
+  // 8. FEDERATED AGGREGATION SIMULATION ANIMATION
   // =========================================================================
 
   function setupSimulation() {
+    if (!els.btnSimulateRound) return;
     els.btnSimulateRound.addEventListener('click', () => {
       if (state.isSimulatingRound) return;
       state.isSimulatingRound = true;
 
-      const btn = els.btnSimulateRound;
-      btn.disabled = true;
-      btn.style.opacity = '0.6';
-
-      const banner = els.simStatusText;
-      banner.textContent = 'Step 1: Factories computing local gradients on private CCTV tensors...';
-      els.nodeCards.forEach(card => card.classList.add('simulating'));
+      els.simStatusText.textContent = 'Simulating Round: Ingesting local mini-batches on Factory Nodes...';
+      els.nodeCards.forEach(c => c && c.classList.add('node-active'));
 
       setTimeout(() => {
-        banner.textContent = 'Step 2: Injecting calibrated Gaussian noise (σ=0.8) into gradient tensors...';
-        els.packetElements.forEach(packet => packet.classList.add('packet-animating'));
-      }, 1200);
+        els.simStatusText.textContent = 'Clipping gradient updates to C=1.0 and injecting Gaussian DP noise (σ=1.5)...';
+        els.packetElements.forEach(p => p && p.classList.add('transmitting'));
+      }, 700);
 
       setTimeout(() => {
-        banner.textContent = 'Step 3: Flower FedAvg server aggregating noise-injected ΔW weights...';
-      }, 2400);
+        els.simStatusText.textContent = 'Server: Performing coordinate-wise FedAvg aggregation...';
+        const srv = document.getElementById('central-server-node');
+        if (srv) srv.classList.add('node-active');
+      }, 1800);
 
       setTimeout(() => {
-        banner.textContent = 'Step 4: Global model weights synchronized back to edge clients!';
-        els.nodeCards.forEach(card => card.classList.remove('simulating'));
-        els.packetElements.forEach(packet => packet.classList.remove('packet-animating'));
-      }, 3600);
-
-      setTimeout(() => {
-        banner.textContent = 'Network Idle • Global Model Weights Synchronized (Round 10)';
-        btn.disabled = false;
-        btn.style.opacity = '1';
+        els.simStatusText.textContent = 'Round Complete: Global parameters updated. Total Rényi DP Epsilon = 8.27 (δ=1e-5).';
+        els.nodeCards.forEach(c => c && c.classList.remove('node-active'));
+        els.packetElements.forEach(p => p && p.classList.remove('transmitting'));
+        const srv = document.getElementById('central-server-node');
+        if (srv) srv.classList.remove('node-active');
         state.isSimulatingRound = false;
-      }, 4500);
+      }, 3000);
     });
   }
 
@@ -1339,4 +1140,5 @@
   } else {
     init();
   }
+
 })();

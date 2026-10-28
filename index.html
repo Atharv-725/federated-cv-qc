@@ -79,19 +79,19 @@
         <!-- KPI Telemetry Bar -->
         <div class="kpi-mini-grid">
           <div class="kpi-mini-card">
-            <span class="kpi-mini-label">GLOBAL MODEL</span>
-            <span class="kpi-mini-val">YOLOv8n-cls (R10)</span>
-            <span class="kpi-mini-sub">Flower FedAvg</span>
+            <span class="kpi-mini-label">ACTIVE ENGINE</span>
+            <span class="kpi-mini-val">ONNX Runtime Web</span>
+            <span class="kpi-mini-sub">YOLOv8n-cls (WASM)</span>
           </div>
           <div class="kpi-mini-card">
             <span class="kpi-mini-label">PRIVACY BOUND</span>
-            <span class="kpi-mini-val">&epsilon; = 5.0 / &delta; = 1e-5</span>
-            <span class="kpi-mini-sub">Gaussian Noise Injected</span>
+            <span class="kpi-mini-val">&epsilon; = 8.27 / &delta; = 1e-5</span>
+            <span class="kpi-mini-sub">Rényi DP Analytical Accountant</span>
           </div>
           <div class="kpi-mini-card">
-            <span class="kpi-mini-label">DATA LEAKAGE</span>
-            <span class="kpi-mini-val text-emerald">0 Bytes Transmitted</span>
-            <span class="kpi-mini-sub">100% Client-Side Privacy</span>
+            <span class="kpi-mini-label">CLIENT-SIDE PRIVACY</span>
+            <span class="kpi-mini-val text-emerald">100% In-Browser</span>
+            <span class="kpi-mini-sub">0 Image Tensors Transmitted</span>
           </div>
         </div>
       </div>
@@ -114,20 +114,32 @@
               </div>
               <div class="upload-prompt-text">
                 <h3 class="upload-heading">Drop any product image here or <button type="button" class="btn-browse-trigger" id="btn-browse-trigger">Browse Files</button></h3>
-                <p class="upload-sub">Supports PNG, JPG, JPEG, WEBP • Or press <kbd>Ctrl</kbd> + <kbd>V</kbd> to paste from clipboard</p>
+                <p class="upload-sub">Supports PNG, JPG, JPEG, WEBP • 100% client-side ONNX inference</p>
+              </div>
+            </div>
+
+            <!-- Target Factory Model Selector -->
+            <div class="benchmark-pills-bar">
+              <span class="pills-title">Target Factory / Neural Network Model:</span>
+              <div class="pills-group" id="factory-model-pills">
+                <button type="button" class="pill-btn active" data-model="factory_a" id="model-pill-a">🔩 Factory A (Metal Nut)</button>
+                <button type="button" class="pill-btn" data-model="factory_b" id="model-pill-b">⚡ Factory B (Transistor)</button>
+                <button type="button" class="pill-btn" data-model="factory_c" id="model-pill-c">🧵 Factory C (Carpet)</button>
+                <button type="button" class="pill-btn" data-model="global_fed" id="model-pill-fed">🌐 DP-FedAvg Global</button>
               </div>
             </div>
 
             <!-- Preset Benchmark Quick-Switchers -->
-            <div class="benchmark-pills-bar">
+            <div class="benchmark-pills-bar" style="margin-top: 0.6rem;">
               <span class="pills-title">Or test benchmark workpiece:</span>
               <div class="pills-group" id="benchmark-pills-group">
                 <button type="button" class="pill-btn active" data-sample="bent_nut">🔩 Bent Nut (Defect)</button>
-                <button type="button" class="pill-btn" data-sample="scratch_nut">⚙️ Scratch Nut (Defect)</button>
-                <button type="button" class="pill-btn" data-sample="broken_lead">⚡ Bent Lead (Defect)</button>
-                <button type="button" class="pill-btn" data-sample="carpet_hole">🧵 Puncture Hole (Defect)</button>
+                <button type="button" class="pill-btn" data-sample="color_nut">⚙️ Color Stain Nut (Defect)</button>
+                <button type="button" class="pill-btn" data-sample="broken_lead">⚡ Bent Lead IC (Defect)</button>
+                <button type="button" class="pill-btn" data-sample="carpet_hole">🧵 Carpet Hole (Defect)</button>
                 <button type="button" class="pill-btn good-pill" data-sample="good_nut">✅ Pristine Nut (Pass)</button>
                 <button type="button" class="pill-btn good-pill" data-sample="good_chip">✅ Pristine IC (Pass)</button>
+                <button type="button" class="pill-btn good-pill" data-sample="good_carpet">✅ Pristine Carpet (Pass)</button>
               </div>
             </div>
           </div>
@@ -142,10 +154,10 @@
 
               <!-- View Mode Tabs -->
               <div class="view-mode-tabs" role="tablist">
-                <button type="button" class="view-tab active" data-mode="raw" id="tab-mode-raw" title="Standard high-resolution optical image">Normal</button>
-                <button type="button" class="view-tab" data-mode="cam" id="tab-mode-cam" title="Class Activation Mapping Anomaly Heatmap">CAM Heatmap</button>
-                <button type="button" class="view-tab" data-mode="edge" id="tab-mode-edge" title="Sobel gradient edge filter highlighting cracks and discontinuities">Edge Metrology</button>
-                <button type="button" class="view-tab" data-mode="mask" id="tab-mode-mask" title="Binary segmentation mask of anomalous pixels">Threshold Mask</button>
+                <button type="button" class="view-tab active" data-mode="raw" id="tab-mode-raw" title="Standard optical workpiece">Normal</button>
+                <button type="button" class="view-tab" data-mode="cam" id="tab-mode-cam" title="Spatial Edge Energy Density Map (Sobel gradient activation density)">Spatial Energy Map</button>
+                <button type="button" class="view-tab" data-mode="edge" id="tab-mode-edge" title="Sobel gradient edge metrology highlighting surface cracks and boundaries">Edge Metrology</button>
+                <button type="button" class="view-tab" data-mode="mask" id="tab-mode-mask" title="Binary gradient tolerance segmentation mask">Threshold Mask</button>
               </div>
             </div>
 
@@ -282,24 +294,24 @@
           <!-- Detailed Metrology Telemetry Grid -->
           <div class="telemetry-grid glass-card">
             <div class="telemetry-item">
-              <span class="ti-label">DETECTED DEFECT TYPE</span>
-              <span class="ti-value text-cyan" id="ti-defect-type">Surface Flange Warp</span>
-              <span class="ti-sub" id="ti-defect-sub">Morphological Irregularity</span>
+              <span class="ti-label">ACTIVE MODEL DOMAIN</span>
+              <span class="ti-value text-cyan" id="ti-defect-type">Factory A (Metal Nut)</span>
+              <span class="ti-sub" id="ti-defect-sub">YOLOv8n-cls (ONNX Web)</span>
             </div>
             <div class="telemetry-item">
-              <span class="ti-label">ESTIMATED DEFECT AREA</span>
-              <span class="ti-value" id="ti-defect-area">142 px²</span>
-              <span class="ti-sub" id="ti-defect-coverage">0.89% of Workpiece</span>
+              <span class="ti-label">CONFIDENCE MARGIN</span>
+              <span class="ti-value font-mono" id="ti-defect-area">+33.8%</span>
+              <span class="ti-sub" id="ti-defect-coverage">Distance to 50% Threshold</span>
             </div>
             <div class="telemetry-item">
-              <span class="ti-label">ANOMALY CENTER (X, Y)</span>
-              <span class="ti-value font-mono" id="ti-defect-coords">X: 140, Y: 260</span>
-              <span class="ti-sub">Pixel Center of Mass</span>
+              <span class="ti-label">DECISION BOUNDARY</span>
+              <span class="ti-value font-mono" id="ti-defect-coords">P(Defect) &ge; 50%</span>
+              <span class="ti-sub" id="ti-defect-sub-coords">Calibrated ROC Cutoff</span>
             </div>
             <div class="telemetry-item">
               <span class="ti-label">PNEUMATIC ACTUATOR</span>
-              <span class="ti-value text-rose" id="ti-actuator">DIVERT TO BIN 2</span>
-              <span class="ti-sub">High-Speed Sorter</span>
+              <span class="ti-value text-rose" id="ti-actuator">DIVERT TO REJECT BIN</span>
+              <span class="ti-sub" id="ti-actuator-sub">Automated Quality Sorter</span>
             </div>
           </div>
 
@@ -309,36 +321,26 @@
               <label for="threshold-range" class="control-label">Defect Tolerance Threshold</label>
               <span class="control-badge" id="threshold-display">50%</span>
             </div>
-            <p class="control-hint">Adjust inspection strictness. Lower values catch micro-flaws; higher values ignore minor cosmetic blemishes.</p>
-            <input type="range" id="threshold-range" min="15" max="90" value="50" step="5" class="styled-slider">
+            <p class="control-hint">Adjust inspection strictness. Controls the decision boundary on true ONNX output probabilities.</p>
+            <input type="range" id="threshold-range" min="15" max="90" value="50" step="1" class="styled-slider">
             <div class="slider-labels">
               <span>High Sensitivity (15%)</span>
               <span>Balanced (50%)</span>
-              <span>High Precision (90%)</span>
+              <span>High Specificity (90%)</span>
             </div>
 
-            <!-- Calibration Mode Selector -->
+            <!-- Calibrated ROC Threshold Quick Presets -->
             <div class="calibration-mode-wrap">
-              <span class="cal-label">Inspection Profile Mode:</span>
+              <span class="cal-label">Category Optimal ROC Presets:</span>
               <div class="cal-buttons-group">
-                <button type="button" class="cal-btn active" id="btn-mode-precision" data-mode="precision" title="Eliminates false alarms on clean products by suppressing normal silhouette and structural boundaries">
-                  🛡️ High-Precision (Zero False Alarms)
+                <button type="button" class="cal-btn active" id="btn-thresh-nut" data-thresh="50" title="Factory A Metal Nut calibrated ROC cutoff (50%)">
+                  🔩 Nut (50%)
                 </button>
-                <button type="button" class="cal-btn" id="btn-mode-balanced" data-mode="balanced" title="Standard industrial defect inspection balance">
-                  🎯 Standard Balanced
+                <button type="button" class="cal-btn" id="btn-thresh-transistor" data-thresh="35" title="Factory B Transistor calibrated ROC cutoff (35% catches subtle bent leads)">
+                  ⚡ Transistor (35%)
                 </button>
-              </div>
-            </div>
-
-            <!-- Manual Ground Truth Calibration Trigger -->
-            <div class="manual-override-wrap">
-              <span class="cal-label">Edge Calibration Probe:</span>
-              <div class="override-btn-group">
-                <button type="button" class="override-btn btn-pass" id="btn-force-pass" title="Calibrate as Good / Nominal Workpiece">
-                  ✅ Mark as Nominal (Pass)
-                </button>
-                <button type="button" class="override-btn btn-fail" id="btn-force-defect" title="Calibrate as Defective Workpiece">
-                  ⚠️ Flag as Defect (Reject)
+                <button type="button" class="cal-btn" id="btn-thresh-carpet" data-thresh="50" title="Factory C Carpet calibrated ROC cutoff (50%)">
+                  🧵 Carpet (50%)
                 </button>
               </div>
             </div>
@@ -443,7 +445,7 @@
           <h2 class="section-title">Differential Privacy & Convergence Curves</h2>
         </div>
         <p class="section-desc">
-          Telemetry from the 10 federated training rounds recorded in <code>server/logs/training_log.json</code>. Each round strictly adds $\epsilon = 0.5$ noise budget to satisfy $(\epsilon, \delta)$-Differential Privacy bounds.
+          Telemetry from federated training rounds logged in <code>server/logs/training_log.json</code>. Evaluated with analytical Rényi Differential Privacy (RDP) composition under per-update $L_2$ clipping ($C=1.0$) and calibrated Gaussian noise ($\sigma=1.5, \delta=10^{-5}$).
         </p>
       </div>
 
@@ -452,11 +454,11 @@
           <div class="chart-header">
             <div>
               <span class="chart-title">Cumulative Privacy Budget Consumption (&epsilon;)</span>
-              <span class="chart-sub">&epsilon; vs Federated Round (Flower FedAvg)</span>
+              <span class="chart-sub">&epsilon; vs Federated Round (Rényi DP Accountant)</span>
             </div>
             <div class="chart-legend">
               <div class="legend-item"><span class="legend-dot dot-actual"></span>Cumulative &epsilon;</div>
-              <div class="legend-item"><span class="legend-dot dot-limit"></span>Privacy Limit (5.0)</div>
+              <div class="legend-item"><span class="legend-dot dot-limit"></span>Privacy Limit (10.0)</div>
             </div>
           </div>
 
@@ -466,40 +468,147 @@
           </div>
 
           <div class="chart-footer-metrics">
-            <div class="cf-metric"><span class="cf-label">Per-Round Budget</span><span class="cf-value">&Delta;&epsilon; = 0.50</span></div>
-            <div class="cf-metric"><span class="cf-label">Total Rounds</span><span class="cf-value">10 Rounds</span></div>
+            <div class="cf-metric"><span class="cf-label">Total Epsilon</span><span class="cf-value">&epsilon; = 8.27</span></div>
+            <div class="cf-metric"><span class="cf-label">Noise Multiplier</span><span class="cf-value">&sigma; = 1.5</span></div>
             <div class="cf-metric"><span class="cf-label">Delta Bound</span><span class="cf-value">&delta; = 1.0 &times; 10<sup>-5</sup></span></div>
-            <div class="cf-metric"><span class="cf-label">Client Participation</span><span class="cf-value">100% (3/3 Nodes)</span></div>
+            <div class="cf-metric"><span class="cf-label">Clipping Norm</span><span class="cf-value">C = 1.0</span></div>
           </div>
         </div>
 
         <div class="rounds-stepper-panel glass-card">
           <div class="stepper-header">
             <span class="stepper-title">Federated Round Inspector</span>
-            <span class="stepper-sub">Scrub through training epochs</span>
+            <span class="stepper-sub">Scrub through training rounds</span>
           </div>
 
           <div class="round-scrubber-control">
             <div class="round-number-display">
               <span class="rn-label">ACTIVE ROUND:</span>
-              <span class="rn-value" id="scrubber-round-num">Round 10</span>
+              <span class="rn-value" id="scrubber-round-num">Round 5</span>
             </div>
-            <input type="range" id="round-slider" min="1" max="10" value="10" step="1" class="styled-slider">
+            <input type="range" id="round-slider" min="1" max="5" value="5" step="1" class="styled-slider">
           </div>
 
           <div class="round-log-details" id="round-log-details">
             <div class="log-row"><span class="log-label">Participating Clients:</span><span class="log-val" id="log-num-clients">3 (Factory A, B, C)</span></div>
-            <div class="log-row"><span class="log-label">Cumulative Epsilon (&epsilon;):</span><span class="log-val text-purple" id="log-epsilon">5.00</span></div>
-            <div class="log-row"><span class="log-label">Round Status:</span><span class="log-val text-success" id="log-failures">0 Failures (Nominal)</span></div>
-            <div class="log-row"><span class="log-label">Weights Transmitted:</span><span class="log-val" id="log-weight-tx">3 &times; 2.9 MB = 8.7 MB (&Delta;W)</span></div>
+            <div class="log-row"><span class="log-label">Cumulative Epsilon (&epsilon;):</span><span class="log-val text-purple" id="log-epsilon">8.27</span></div>
+            <div class="log-row"><span class="log-label">Noise Parameter:</span><span class="log-val text-success" id="log-failures">&sigma; = 1.5, C = 1.0</span></div>
+            <div class="log-row"><span class="log-label">Weights Transmitted:</span><span class="log-val" id="log-weight-tx">3 &times; 2.8 MB = 8.4 MB (&Delta;W)</span></div>
           </div>
 
           <div class="round-annotation-box">
-            <div class="annotation-badge">ROUND 10 MILESTONE</div>
+            <div class="annotation-badge">ROUND 5 CONVERGENCE</div>
             <p class="annotation-text" id="round-annotation-text">
-              Final global aggregation completed. Global YOLOv8 classification weights converged across all 3 diverse industrial defect domains with maximum privacy preservation.
+              Round 5 completed. L2 norm clipped to 1.0, Gaussian noise (sigma=1.5) injected. Total cumulative epsilon spent = 8.27 (delta=1e-5).
             </p>
           </div>
+        </div>
+      </div>
+
+      <!-- Empirical Evaluation Comparison Table -->
+      <div class="benchmark-table-panel glass-card" style="margin-top: 2rem; padding: 1.5rem;">
+        <div class="panel-heading-row" style="margin-bottom: 1rem;">
+          <div>
+            <h3 class="ph-title" style="font-size: 1.15rem; font-weight: 700;">Empirical Test Evaluation (Held-Out Test Sets)</h3>
+            <p class="section-desc" style="margin: 0.35rem 0 0.5rem; font-size: 0.85rem;">
+              Strictly held-out test evaluation with zero overlap against training or validation samples. 
+              Comparing Centralized Baselines against Multi-Domain Differential Privacy Federated Learning (DP-FedAvg, $\sigma=1.5, C=1.0$).
+            </p>
+          </div>
+        </div>
+
+        <div class="table-responsive" style="overflow-x: auto;">
+          <table class="benchmark-table" style="width: 100%; border-collapse: collapse; font-size: 0.83rem; text-align: left;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-family: var(--font-mono);">
+                <th style="padding: 0.75rem 1rem;">Factory / Domain</th>
+                <th style="padding: 0.75rem 1rem;">Paradigm</th>
+                <th style="padding: 0.75rem 1rem;">Test Accuracy</th>
+                <th style="padding: 0.75rem 1rem;">Precision</th>
+                <th style="padding: 0.75rem 1rem;">Recall</th>
+                <th style="padding: 0.75rem 1rem;">F1-Score</th>
+                <th style="padding: 0.75rem 1rem;">AUROC</th>
+                <th style="padding: 0.75rem 1rem;">ECE Calibration</th>
+                <th style="padding: 0.75rem 1rem;">Held-Out Test N</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Factory A: metal_nut -->
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                <td style="padding: 0.75rem 1rem; font-weight: 600;">🔩 Factory A (metal_nut)</td>
+                <td style="padding: 0.75rem 1rem;"><span style="padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.72rem; background: rgba(16,185,129,0.15); color: #10b981; font-weight: 700;">Centralized</span></td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono); font-weight: 700;">75.00%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">100.00%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">65.52%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono); font-weight: 700; color: var(--accent-cyan);">0.7917</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono); color: #10b981; font-weight: 700;">0.9875</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.2411</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">40 (11 G / 29 D)</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <td style="padding: 0.75rem 1rem; font-weight: 600; color: var(--text-muted);">🔩 Factory A (metal_nut)</td>
+                <td style="padding: 0.75rem 1rem;"><span style="padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.72rem; background: rgba(139,92,246,0.15); color: #a78bfa; font-weight: 700;">DP-FedAvg (R5)</span></td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">27.50%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.00%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.00%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.0000</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.5000</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.0000</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">40 (11 G / 29 D)</td>
+              </tr>
+
+              <!-- Factory B: transistor -->
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                <td style="padding: 0.75rem 1rem; font-weight: 600;">⚡ Factory B (transistor)</td>
+                <td style="padding: 0.75rem 1rem;"><span style="padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.72rem; background: rgba(16,185,129,0.15); color: #10b981; font-weight: 700;">Centralized</span></td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono); font-weight: 700;">80.95%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">100.00%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">33.33%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono); font-weight: 700; color: var(--accent-cyan);">0.5000</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono); color: #10b981; font-weight: 700;">0.8639</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.1152</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">42 (30 G / 12 D)</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <td style="padding: 0.75rem 1rem; font-weight: 600; color: var(--text-muted);">⚡ Factory B (transistor)</td>
+                <td style="padding: 0.75rem 1rem;"><span style="padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.72rem; background: rgba(139,92,246,0.15); color: #a78bfa; font-weight: 700;">DP-FedAvg (R5)</span></td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">71.43%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.00%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.00%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.0000</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.5000</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.0000</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">42 (30 G / 12 D)</td>
+              </tr>
+
+              <!-- Factory C: carpet -->
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                <td style="padding: 0.75rem 1rem; font-weight: 600;">🧵 Factory C (carpet)</td>
+                <td style="padding: 0.75rem 1rem;"><span style="padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.72rem; background: rgba(16,185,129,0.15); color: #10b981; font-weight: 700;">Centralized</span></td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono); font-weight: 700;">85.37%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">88.89%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">88.89%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono); font-weight: 700; color: var(--accent-cyan);">0.8889</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono); color: #10b981; font-weight: 700;">0.8836</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.1784</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">41 (14 G / 27 D)</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.75rem 1rem; font-weight: 600; color: var(--text-muted);">🧵 Factory C (carpet)</td>
+                <td style="padding: 0.75rem 1rem;"><span style="padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.72rem; background: rgba(139,92,246,0.15); color: #a78bfa; font-weight: 700;">DP-FedAvg (R5)</span></td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">34.15%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.00%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.00%</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.0000</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.5000</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">0.0000</td>
+                <td style="padding: 0.75rem 1rem; font-family: var(--font-mono);">41 (14 G / 27 D)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top: 1rem; padding: 0.85rem; border-radius: 8px; background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.2); font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5;">
+          <strong style="color: var(--accent-purple-light);">Empirical Research Insight:</strong> Centralized domain-specific training achieves high test accuracy (85.37% on carpets, 0.9875 AUROC on nuts). In contrast, cross-modal Federated DP-FedAvg ($\sigma=1.5, C=1.0$) across heterogeneous non-IID manufacturing data collapses global recall because the DP perturbation noise dominates the inter-client gradient signals. In real-world edge industrial vision, localized personalization or split federated architectures are required.
         </div>
       </div>
     </section>
@@ -610,7 +719,8 @@
     </div>
   </footer>
 
-  <script src="signatures.js"></script>
+  <!-- ONNX Runtime Web Engine -->
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-# Exclude raw dataset (too large)
+# Exclude raw datasets and clean splits (too large)
 data/factory_a/metal_nut/
 data/factory_b/transistor/
 data/factory_c/carpet/
@@ -6,8 +6,17 @@ data/factory_a/yolo/
 data/factory_b/yolo/
 data/factory_c/yolo/
 data/*/*balanced/
-__pycache__/
+data/*/*/clean_split/
+data/factory_a/clean_split/
+data/factory_b/clean_split/
+data/factory_c/clean_split/
 
-# Keep everything else
-!runs/
+# Intermediate runs & training checkpoints
+runs/
+__pycache__/
+*.pyc
+
+# Keep server logs & exported web ONNX models
 !server/logs/
+!models/
+!public/models/
